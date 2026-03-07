@@ -29,6 +29,7 @@ model Group {
   members     GroupMember[]
   players     Player[]
   teamHistory TeamHistory[]
+  incompatibilities PlayerIncompatibility[]
 }
 
 model GroupMember {
@@ -51,6 +52,8 @@ model Player {
   ratings       Rating[]
   averageRating Float?
   createdAt     DateTime @default(now())
+  incompatibilities1 PlayerIncompatibility[] @relation("incompatibilityPlayer1")
+  incompatibilities2 PlayerIncompatibility[] @relation("incompatibilityPlayer2")
 
   @@index([groupId])
 }
@@ -76,6 +79,22 @@ model TeamHistory {
   averageDiff   Float
   generatedAt   DateTime @default(now())
 
+  @@index([groupId])
+}
+
+model PlayerIncompatibility {
+  id         String   @id @default(cuid())
+  groupId    String
+  player1Id  String
+  player2Id  String
+  reason     String?
+  createdAt  DateTime @default(now())
+  
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  player1    Player   @relation("incompatibilityPlayer1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2    Player   @relation("incompatibilityPlayer2", fields: [player2Id], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, player1Id, player2Id])
   @@index([groupId])
 }
 

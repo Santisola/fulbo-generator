@@ -9,6 +9,55 @@ interface PlayerWithRating {
   averageRating: number | null
 }
 
+interface IncompatibilityMap {
+  [playerId: string]: Set<string>
+}
+
+function buildIncompatibilityMap(incompatibilities: any[]): IncompatibilityMap {
+  const map: IncompatibilityMap = {}
+
+  incompatibilities.forEach(incompat => {
+    const { player1Id, player2Id } = incompat
+
+    if (!map[player1Id]) map[player1Id] = new Set()
+    if (!map[player2Id]) map[player2Id] = new Set()
+
+    map[player1Id].add(player2Id)
+    map[player2Id].add(player1Id)
+  })
+
+  return map
+}
+
+function isValidTeamAssignment(
+  teamA: PlayerWithRating[],
+  teamB: PlayerWithRating[],
+  incompatibilityMap: IncompatibilityMap
+): boolean {
+  // Verificar que no haya incompatibilidades en el mismo equipo
+  for (const player of teamA) {
+    if (incompatibilityMap[player.id]) {
+      for (const incompatibleId of incompatibilityMap[player.id]) {
+        if (teamA.some(p => p.id === incompatibleId)) {
+          return false
+        }
+      }
+    }
+  }
+
+  for (const player of teamB) {
+    if (incompatibilityMap[player.id]) {
+      for (const incompatibleId of incompatibilityMap[player.id]) {
+        if (teamB.some(p => p.id === incompatibleId)) {
+          return false
+        }
+      }
+    }
+  }
+
+  return true
+}
+
 function partitionPlayers(
   players: PlayerWithRating[],
   targetSize: number
@@ -148,36 +197,49 @@ export async function POST(
       return NextResponse.json({ error: 'Algunos jugadores no fueron encontrados' }, { status: 400 })
     }
 
-    let bestTeam: { teamA: PlayerWithRating[]; teamB: PlayerWithRating[] } | null = null
-    let bestDiff = Infinity
+     let bestTeam: { teamA: PlayerWithRating[]; teamB: PlayerWithRating[] } | null = null
+     let bestDiff = Infinity
 
-    const maxAttempts = 100
-    let attempts = 0
+     const maxAttempts = 100
+     let attempts = 0
 
-    while (attempts < maxAttempts) {
-      const shuffled = [...players].sort(() => Math.random() - 0.5)
-      const splitIndex = Math.floor(shuffled.length / 2)
-      const candidateA = shuffled.slice(0, splitIndex)
-      const candidateB = shuffled.slice(splitIndex)
+     // Obtener incompatibilidades del grupo
+     const incompatibilities = await prisma.playerIncompatibility.findMany({
+       where: { groupId }
+     })
 
-      const diff = calculateDiff(candidateA, candidateB)
+     const incompatibilityMap = buildIncompatibilityMap(incompatibilities)
 
-      if (diff < bestDiff) {
-        const teamAIds = candidateA.map(p => p.id)
-        const teamBIds = candidateB.map(p => p.id)
-        
-        const hasDuplicate = await hasRecentDuplicate(groupId, teamAIds, teamBIds)
-        
-        if (!hasDuplicate || diff < 0.1) {
-          bestDiff = diff
-          bestTeam = { teamA: candidateA, teamB: candidateB }
-          
-          if (diff < 0.1) break
-        }
-      }
+     while (attempts < maxAttempts) {
+       const shuffled = [...players].sort(() => Math.random() - 0.5)
+       const splitIndex = Math.floor(shuffled.length / 2)
+       const candidateA = shuffled.slice(0, splitIndex)
+       const candidateB = shuffled.slice(splitIndex)
 
-      attempts++
-    }
+       // Validar que no viole incompatibilidades
+       if (!isValidTeamAssignment(candidateA, candidateB, incompatibilityMap)) {
+         attempts++
+         continue
+       }
+
+       const diff = calculateDiff(candidateA, candidateB)
+
+       if (diff < bestDiff) {
+         const teamAIds = candidateA.map(p => p.id)
+         const teamBIds = candidateB.map(p => p.id)
+         
+         const hasDuplicate = await hasRecentDuplicate(groupId, teamAIds, teamBIds)
+         
+         if (!hasDuplicate || diff < 0.1) {
+           bestDiff = diff
+           bestTeam = { teamA: candidateA, teamB: candidateB }
+           
+           if (diff < 0.1) break
+         }
+       }
+
+       attempts++
+     }
 
     if (!bestTeam) {
       return NextResponse.json({ error: 'No se pudieron generar equipos únicos' }, { status: 500 })
