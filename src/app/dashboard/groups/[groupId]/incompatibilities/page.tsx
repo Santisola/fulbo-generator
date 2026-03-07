@@ -16,8 +16,22 @@ interface Incompatibility {
   player2Id: string
   player1: Player
   player2: Player
+  type: 'CANNOT_FACE_EACH_OTHER' | 'MUST_BE_ON_SAME_TEAM'
   reason: string | null
   createdAt: string
+}
+
+const TYPE_DESCRIPTIONS = {
+  CANNOT_FACE_EACH_OTHER: {
+    label: 'No pueden jugar enfrentados',
+    description: 'Los jugadores no pueden estar en equipos opuestos',
+    icon: '⚡'
+  },
+  MUST_BE_ON_SAME_TEAM: {
+    label: 'Deben estar en el mismo equipo',
+    description: 'Los jugadores siempre deben estar juntos',
+    icon: '🤝'
+  }
 }
 
 export default function IncompatibilitiesPage({
@@ -33,6 +47,7 @@ export default function IncompatibilitiesPage({
   const [error, setError] = useState('')
   const [selectedPlayer1, setSelectedPlayer1] = useState('')
   const [selectedPlayer2, setSelectedPlayer2] = useState('')
+  const [selectedType, setSelectedType] = useState<'CANNOT_FACE_EACH_OTHER' | 'MUST_BE_ON_SAME_TEAM'>('CANNOT_FACE_EACH_OTHER')
   const [reason, setReason] = useState('')
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -89,6 +104,7 @@ export default function IncompatibilitiesPage({
         body: JSON.stringify({
           player1Id: selectedPlayer1,
           player2Id: selectedPlayer2,
+          type: selectedType,
           reason: reason || undefined
         })
       })
@@ -96,7 +112,7 @@ export default function IncompatibilitiesPage({
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Error al crear incompatibilidad')
+        setError(data.error || 'Error al crear restricción')
         setCreating(false)
         return
       }
@@ -105,6 +121,7 @@ export default function IncompatibilitiesPage({
       setSelectedPlayer1('')
       setSelectedPlayer2('')
       setReason('')
+      setSelectedType('CANNOT_FACE_EACH_OTHER')
     } catch (err) {
       setError('Error de conexión')
       console.error(err)
@@ -114,7 +131,7 @@ export default function IncompatibilitiesPage({
   }
 
   const handleDeleteIncompatibility = async (incompatibilityId: string) => {
-    if (!confirm('¿Estás seguro que deseas eliminar esta incompatibilidad?')) {
+    if (!confirm('¿Estás seguro que deseas eliminar esta restricción?')) {
       return
     }
 
@@ -126,7 +143,7 @@ export default function IncompatibilitiesPage({
       if (res.ok) {
         setIncompatibilities(incompatibilities.filter(i => i.id !== incompatibilityId))
       } else {
-        setError('Error al eliminar incompatibilidad')
+        setError('Error al eliminar restricción')
       }
     } catch (err) {
       setError('Error de conexión')
@@ -181,13 +198,13 @@ export default function IncompatibilitiesPage({
             Grupo
           </Link>
           <span>/</span>
-          <span className="text-[var(--foreground)]">Incompatibilidades</span>
+          <span className="text-[var(--foreground)]">Restricciones</span>
         </div>
         <h1 className="text-3xl font-bold text-[var(--foreground)]">
-          Incompatibilidades de Jugadores
+          Restricciones de Jugadores
         </h1>
         <p className="text-[var(--muted-foreground)] mt-2">
-          Configura qué jugadores no pueden jugar en equipos enfrentados
+          Configura reglas para cómo los jugadores pueden ser asignados a equipos
         </p>
       </div>
 
@@ -202,7 +219,7 @@ export default function IncompatibilitiesPage({
         <div className="lg:col-span-1">
           <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 sticky top-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-              Agregar Incompatibilidad
+              Agregar Restricción
             </h2>
 
             <form onSubmit={handleCreateIncompatibility} className="space-y-4">
@@ -239,6 +256,37 @@ export default function IncompatibilitiesPage({
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-3">
+                  Tipo de Restricción
+                </label>
+                <div className="space-y-2">
+                  {Object.entries(TYPE_DESCRIPTIONS).map(([key, desc]) => (
+                    <label key={key} className="flex items-start gap-3 p-3 border border-[var(--border)] rounded-lg cursor-pointer hover:bg-[var(--secondary)] transition-colors" style={{
+                      borderColor: selectedType === key ? 'var(--primary)' : 'var(--border)',
+                      backgroundColor: selectedType === key ? 'var(--primary)/10' : 'transparent'
+                    }}>
+                      <input
+                        type="radio"
+                        name="type"
+                        value={key}
+                        checked={selectedType === key}
+                        onChange={(e) => setSelectedType(e.target.value as any)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-[var(--foreground)]">
+                          {desc.icon} {desc.label}
+                        </div>
+                        <div className="text-xs text-[var(--muted-foreground)] mt-1">
+                          {desc.description}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
                   Razón (opcional)
                 </label>
@@ -257,7 +305,7 @@ export default function IncompatibilitiesPage({
                 disabled={creating}
                 className="w-full py-2 bg-[var(--primary)] text-[var(--primary-foreground)] font-medium rounded-lg hover:opacity-90 disabled:opacity-50"
               >
-                {creating ? 'Creando...' : 'Crear Incompatibilidad'}
+                {creating ? 'Creando...' : 'Crear Restricción'}
               </button>
             </form>
           </div>
@@ -269,76 +317,85 @@ export default function IncompatibilitiesPage({
             {incompatibilities.length === 0 ? (
               <div className="p-8 text-center">
                 <p className="text-[var(--muted-foreground)]">
-                  No hay incompatibilidades configuradas
+                  No hay restricciones configuradas
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-[var(--border)]">
-                {incompatibilities.map(incompat => (
-                  <div key={incompat.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <p className="font-medium text-[var(--foreground)]">
-                          {incompat.player1.name} ↔ {incompat.player2.name}
-                        </p>
-                        {incompat.reason && (
-                          <p className="text-sm text-[var(--muted-foreground)] mt-1">
-                            {editingId === incompat.id ? (
-                              <textarea
-                                value={editingReason}
-                                onChange={(e) => setEditingReason(e.target.value)}
-                                maxLength={255}
-                                className="w-full px-2 py-1 bg-[var(--input)] border border-[var(--border)] rounded text-sm text-[var(--foreground)] resize-none"
-                                rows={2}
-                              />
-                            ) : (
-                              incompat.reason
-                            )}
+                {incompatibilities.map(incompat => {
+                  const typeDesc = TYPE_DESCRIPTIONS[incompat.type]
+                  return (
+                    <div key={incompat.id} className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">{typeDesc.icon}</span>
+                            <p className="font-medium text-[var(--foreground)]">
+                              {incompat.player1.name} & {incompat.player2.name}
+                            </p>
+                          </div>
+                          <p className="text-xs text-[var(--primary)] mb-2">
+                            {typeDesc.label}
                           </p>
-                        )}
+                          {incompat.reason && (
+                            <p className="text-sm text-[var(--muted-foreground)]">
+                              {editingId === incompat.id ? (
+                                <textarea
+                                  value={editingReason}
+                                  onChange={(e) => setEditingReason(e.target.value)}
+                                  maxLength={255}
+                                  className="w-full px-2 py-1 bg-[var(--input)] border border-[var(--border)] rounded text-sm text-[var(--foreground)] resize-none"
+                                  rows={2}
+                                />
+                              ) : (
+                                <>Razón: {incompat.reason}</>
+                              )}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          {editingId === incompat.id ? (
+                            <>
+                              <button
+                                onClick={() => handleUpdateReason(incompat.id)}
+                                className="px-3 py-1 text-xs bg-[var(--primary)] text-[var(--primary-foreground)] rounded hover:opacity-90"
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={() => setEditingId(null)}
+                                className="px-3 py-1 text-xs bg-[var(--secondary)] text-[var(--foreground)] rounded hover:opacity-90"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingId(incompat.id)
+                                  setEditingReason(incompat.reason || '')
+                                }}
+                                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDeleteIncompatibility(incompat.id)}
+                                className="text-red-400 hover:text-red-500 text-sm"
+                              >
+                                Eliminar
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {editingId === incompat.id ? (
-                          <>
-                            <button
-                              onClick={() => handleUpdateReason(incompat.id)}
-                              className="px-3 py-1 text-xs bg-[var(--primary)] text-[var(--primary-foreground)] rounded hover:opacity-90"
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="px-3 py-1 text-xs bg-[var(--secondary)] text-[var(--foreground)] rounded hover:opacity-90"
-                            >
-                              Cancelar
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => {
-                                setEditingId(incompat.id)
-                                setEditingReason(incompat.reason || '')
-                              }}
-                              className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              onClick={() => handleDeleteIncompatibility(incompat.id)}
-                              className="text-red-400 hover:text-red-500 text-sm"
-                            >
-                              Eliminar
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {new Date(incompat.createdAt).toLocaleDateString('es-AR')}
+                      </p>
                     </div>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      {new Date(incompat.createdAt).toLocaleDateString('es-AR')}
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

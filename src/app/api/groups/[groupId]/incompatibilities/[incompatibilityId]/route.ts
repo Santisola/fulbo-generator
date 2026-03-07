@@ -26,10 +26,10 @@ export async function DELETE(
     })
 
     if (!membership || membership.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Solo los administradores pueden eliminar incompatibilidades' }, { status: 403 })
+      return NextResponse.json({ error: 'Solo los administradores pueden eliminar restricciones' }, { status: 403 })
     }
 
-    // Verificar que la incompatibilidad existe en el grupo
+    // Verificar que la restricción existe en el grupo
     const incompatibility = await prisma.playerIncompatibility.findFirst({
       where: {
         id: incompatibilityId,
@@ -38,7 +38,7 @@ export async function DELETE(
     })
 
     if (!incompatibility) {
-      return NextResponse.json({ error: 'Incompatibilidad no encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'Restricción no encontrada' }, { status: 404 })
     }
 
     await prisma.playerIncompatibility.delete({
@@ -48,7 +48,7 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting incompatibility:', error)
-    return NextResponse.json({ error: 'Error al eliminar incompatibilidad' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al eliminar restricción' }, { status: 500 })
   }
 }
 
@@ -75,7 +75,7 @@ export async function PUT(
     })
 
     if (!membership || membership.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Solo los administradores pueden editar incompatibilidades' }, { status: 403 })
+      return NextResponse.json({ error: 'Solo los administradores pueden editar restricciones' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -93,6 +93,6 @@ export async function PUT(
     return NextResponse.json(incompatibility)
   } catch (error) {
     console.error('Error updating incompatibility:', error)
-    return NextResponse.json({ error: 'Error al actualizar incompatibilidad' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al actualizar restricción' }, { status: 500 })
   }
 }

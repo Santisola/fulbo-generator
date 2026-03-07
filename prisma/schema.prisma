@@ -87,6 +87,7 @@ model PlayerIncompatibility {
   groupId    String
   player1Id  String
   player2Id  String
+  type       CompatibilityType @default(CANNOT_FACE_EACH_OTHER)
   reason     String?
   createdAt  DateTime @default(now())
   
@@ -101,4 +102,9 @@ model PlayerIncompatibility {
 enum Role {
   ADMIN
   MEMBER
+}
+
+enum CompatibilityType {
+  CANNOT_FACE_EACH_OTHER      // No pueden jugar enfrentados (equipos opuestos)
+  MUST_BE_ON_SAME_TEAM        // Deben estar en el mismo equipo
 }

@@ -10,20 +10,32 @@ interface PlayerWithRating {
 }
 
 interface IncompatibilityMap {
-  [playerId: string]: Set<string>
+  [playerId: string]: {
+    cannotFace: Set<string>
+    mustTogether: Set<string>
+  }
 }
 
 function buildIncompatibilityMap(incompatibilities: any[]): IncompatibilityMap {
   const map: IncompatibilityMap = {}
 
   incompatibilities.forEach(incompat => {
-    const { player1Id, player2Id } = incompat
+    const { player1Id, player2Id, type } = incompat
 
-    if (!map[player1Id]) map[player1Id] = new Set()
-    if (!map[player2Id]) map[player2Id] = new Set()
+    if (!map[player1Id]) {
+      map[player1Id] = { cannotFace: new Set(), mustTogether: new Set() }
+    }
+    if (!map[player2Id]) {
+      map[player2Id] = { cannotFace: new Set(), mustTogether: new Set() }
+    }
 
-    map[player1Id].add(player2Id)
-    map[player2Id].add(player1Id)
+    if (type === 'CANNOT_FACE_EACH_OTHER') {
+      map[player1Id].cannotFace.add(player2Id)
+      map[player2Id].cannotFace.add(player1Id)
+    } else if (type === 'MUST_BE_ON_SAME_TEAM') {
+      map[player1Id].mustTogether.add(player2Id)
+      map[player2Id].mustTogether.add(player1Id)
+    }
   })
 
   return map
@@ -34,11 +46,22 @@ function isValidTeamAssignment(
   teamB: PlayerWithRating[],
   incompatibilityMap: IncompatibilityMap
 ): boolean {
-  // Verificar que no haya incompatibilidades en el mismo equipo
+  // Validar CANNOT_FACE_EACH_OTHER: no pueden estar en equipos diferentes
   for (const player of teamA) {
-    if (incompatibilityMap[player.id]) {
-      for (const incompatibleId of incompatibilityMap[player.id]) {
-        if (teamA.some(p => p.id === incompatibleId)) {
+    if (incompatibilityMap[player.id]?.cannotFace) {
+      for (const incompatibleId of incompatibilityMap[player.id].cannotFace) {
+        if (teamB.some(p => p.id === incompatibleId)) {
+          return false
+        }
+      }
+    }
+  }
+
+  // Validar MUST_BE_ON_SAME_TEAM: deben estar en el mismo equipo
+  for (const player of teamA) {
+    if (incompatibilityMap[player.id]?.mustTogether) {
+      for (const incompatibleId of incompatibilityMap[player.id].mustTogether) {
+        if (!teamA.some(p => p.id === incompatibleId)) {
           return false
         }
       }
@@ -46,9 +69,9 @@ function isValidTeamAssignment(
   }
 
   for (const player of teamB) {
-    if (incompatibilityMap[player.id]) {
-      for (const incompatibleId of incompatibilityMap[player.id]) {
-        if (teamB.some(p => p.id === incompatibleId)) {
+    if (incompatibilityMap[player.id]?.mustTogether) {
+      for (const incompatibleId of incompatibilityMap[player.id].mustTogether) {
+        if (!teamB.some(p => p.id === incompatibleId)) {
           return false
         }
       }

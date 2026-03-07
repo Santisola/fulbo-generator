@@ -7,6 +7,7 @@ import { z } from 'zod'
 const createIncompatibilitySchema = z.object({
   player1Id: z.string().min(1),
   player2Id: z.string().min(1),
+  type: z.enum(['CANNOT_FACE_EACH_OTHER', 'MUST_BE_ON_SAME_TEAM']).default('CANNOT_FACE_EACH_OTHER'),
   reason: z.string().max(255).optional()
 })
 
@@ -74,15 +75,15 @@ export async function POST(
     })
 
     if (!membership || membership.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Solo los administradores pueden crear incompatibilidades' }, { status: 403 })
+      return NextResponse.json({ error: 'Solo los administradores pueden crear restricciones' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { player1Id, player2Id, reason } = createIncompatibilitySchema.parse(body)
+    const { player1Id, player2Id, type, reason } = createIncompatibilitySchema.parse(body)
 
     // Validar que no sean el mismo jugador
     if (player1Id === player2Id) {
-      return NextResponse.json({ error: 'Un jugador no puede ser incompatible consigo mismo' }, { status: 400 })
+      return NextResponse.json({ error: 'Un jugador no puede tener restricción consigo mismo' }, { status: 400 })
     }
 
     // Validar que ambos jugadores existan en el grupo
@@ -95,7 +96,7 @@ export async function POST(
       return NextResponse.json({ error: 'Uno o ambos jugadores no existen en el grupo' }, { status: 404 })
     }
 
-    // Crear incompatibilidad (normalizar para evitar duplicados)
+    // Crear restricción (normalizar para evitar duplicados)
     const [normalizedPlayer1Id, normalizedPlayer2Id] = 
       player1Id < player2Id ? [player1Id, player2Id] : [player2Id, player1Id]
 
@@ -105,6 +106,7 @@ export async function POST(
           groupId,
           player1Id: normalizedPlayer1Id,
           player2Id: normalizedPlayer2Id,
+          type,
           reason: reason || null
         },
         include: {
@@ -117,7 +119,7 @@ export async function POST(
     } catch (error: any) {
       if (error.code === 'P2002') {
         return NextResponse.json(
-          { error: 'Ya existe una incompatibilidad entre estos jugadores' },
+          { error: 'Ya existe una restricción entre estos jugadores' },
           { status: 409 }
         )
       }
@@ -128,6 +130,6 @@ export async function POST(
       return NextResponse.json({ error: error.issues[0].message }, { status: 400 })
     }
     console.error('Error creating incompatibility:', error)
-    return NextResponse.json({ error: 'Error al crear incompatibilidad' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al crear restricción' }, { status: 500 })
   }
 }
