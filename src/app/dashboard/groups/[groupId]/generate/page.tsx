@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { HelpTooltip } from '@/components/HelpTooltip'
 
 interface Player {
   id: string
@@ -104,7 +105,24 @@ export default function GenerateTeamsPage({
           Volver
         </button>
 
-        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">Generar Equipos</h1>
+        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2 flex items-center gap-2">
+          Generar Equipos
+          <HelpTooltip
+            title="Cómo funciona el algoritmo"
+            content={
+              <div className="space-y-2 text-xs">
+                <p><strong>El sistema:</strong></p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Itera 100 veces buscando la mejor combinación</li>
+                  <li>Minimiza la diferencia de promedio entre equipos</li>
+                  <li>Respeta todas las restricciones</li>
+                  <li>Distribuye el nivel de juego equitativamente</li>
+                </ul>
+              </div>
+            }
+            position="bottom"
+          />
+        </h1>
         <p className="text-[var(--muted-foreground)] mb-8">
           Seleccioná los jugadores que van a jugar hoy
         </p>
@@ -117,10 +135,17 @@ export default function GenerateTeamsPage({
 
         {result ? (
           <div className="space-y-6">
-            <div className="p-4 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-center">
-              <span className="text-[var(--primary)] font-semibold">Diferencia promedio: </span>
-              <strong className="text-[var(--foreground)]">{result.averageDiff.toFixed(2)}</strong>
-              <span className="text-[var(--primary)]"> puntos</span>
+           <div className="p-4 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-center flex items-center justify-center gap-2">
+              <div>
+                <span className="text-[var(--primary)] font-semibold">Diferencia promedio: </span>
+                <strong className="text-[var(--foreground)]">{result.averageDiff.toFixed(2)}</strong>
+                <span className="text-[var(--primary)]"> puntos</span>
+              </div>
+              <HelpTooltip
+                title="Diferencia de promedio"
+                content="La diferencia entre el promedio total de cada equipo. Cuanto menor sea, más balanceados están los equipos. El objetivo es llegar a 0 (equipos perfectamente balanceados)."
+                position="right"
+              />
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">

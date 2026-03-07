@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CopyButton } from '@/components/CopyButton'
+import { HelpTooltip } from '@/components/HelpTooltip'
 
 async function getGroup(groupId: string, userId: string) {
   const membership = await prisma.groupMember.findUnique({
@@ -88,7 +89,20 @@ export default async function GroupDetailPage({
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-[var(--foreground)]">Jugadores</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-[var(--foreground)]">Jugadores</h2>
+              <HelpTooltip
+                title="Sistema de Puntaje"
+                content={
+                  <div className="space-y-2">
+                    <p>Cada miembro del grupo puntúa a los jugadores de 1-10 según su nivel de juego.</p>
+                    <p><strong>Tu puntaje es privado:</strong> Solo tú ves lo que pusiste.</p>
+                    <p>El promedio de todos los puntajes se usa para balancear los equipos automáticamente.</p>
+                  </div>
+                }
+                position="right"
+              />
+            </div>
             {isAdmin && (
               <Link
                 href={`/dashboard/groups/${groupId}/players/new`}
