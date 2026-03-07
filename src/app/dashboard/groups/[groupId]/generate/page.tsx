@@ -40,8 +40,8 @@ export default function GenerateTeamsPage({
   }, [groupId])
 
   const togglePlayer = (id: string) => {
-    setSelected(prev => 
-      prev.includes(id) 
+    setSelected(prev =>
+      prev.includes(id)
         ? prev.filter(p => p !== id)
         : [...prev, id]
     )
@@ -202,9 +202,8 @@ export default function GenerateTeamsPage({
               {players.map((player) => (
                 <label
                   key={player.id}
-                  className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-[var(--secondary)] transition-colors ${
-                    selected.includes(player.id) ? 'bg-[var(--primary)]/5' : ''
-                  }`}
+                  className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-[var(--secondary)] transition-colors ${selected.includes(player.id) ? 'bg-[var(--primary)]/5' : ''
+                    }`}
                 >
                   <input
                     type="checkbox"
@@ -213,9 +212,6 @@ export default function GenerateTeamsPage({
                     className="w-5 h-5 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
                   />
                   <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                  <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                    {player.averageRating ? `⭐ ${player.averageRating.toFixed(1)}` : 'Sin puntaje'}
-                  </span>
                 </label>
               ))}
             </div>

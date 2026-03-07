@@ -116,33 +116,41 @@ export default async function GroupDetailPage({
               {group.players.map((player) => {
                 const myRating = player.ratings.find((r) => r.userId === session.user.id)
                 return (
-                  <div key={player.id} className="p-4 flex justify-between items-center">
-                    <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                    <div className="flex items-center gap-3">
-                      {myRating ? (
-                        <span className="text-sm text-[var(--muted-foreground)]">
-                          Tu puntaje: <strong className="text-[var(--foreground)]">{myRating.score}</strong>
-                        </span>
-                      ) : (
-                        <Link
-                          href={`/dashboard/groups/${groupId}/players/${player.id}/rate`}
-                          className="text-sm text-[var(--primary)] hover:underline"
-                        >
-                          Puntuar
-                        </Link>
-                      )}
-                      {isAdmin && (
-                        <Link
-                          href={`/dashboard/groups/${groupId}/players/${player.id}/edit`}
-                          className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
+                   <div key={player.id} className="p-4 flex justify-between items-center">
+                     <span className="font-medium text-[var(--foreground)]">{player.name}</span>
+                     <div className="flex items-center gap-3">
+                       {myRating ? (
+                         <div className="flex items-center gap-3">
+                           <span className="text-sm text-[var(--muted-foreground)]">
+                             Tu puntaje: <strong className="text-[var(--foreground)]">{myRating.score}</strong>
+                           </span>
+                           <Link
+                             href={`/dashboard/groups/${groupId}/players/${player.id}/rate`}
+                             className="text-sm text-[var(--primary)] hover:underline"
+                           >
+                             Editar
+                           </Link>
+                         </div>
+                       ) : (
+                         <Link
+                           href={`/dashboard/groups/${groupId}/players/${player.id}/rate`}
+                           className="text-sm text-[var(--primary)] hover:underline"
+                         >
+                           Puntuar
+                         </Link>
+                       )}
+                       {isAdmin && (
+                         <Link
+                           href={`/dashboard/groups/${groupId}/players/${player.id}/edit`}
+                           className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                         >
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                           </svg>
+                         </Link>
+                       )}
+                     </div>
+                   </div>
                 )
               })}
             </div>

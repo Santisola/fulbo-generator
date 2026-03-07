@@ -8,6 +8,58 @@ const ratePlayerSchema = z.object({
   score: z.number().int().min(1).max(10)
 })
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ groupId: string; playerId: string }> }
+) {
+  try {
+    const { groupId, playerId } = await params
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const membership = await prisma.groupMember.findUnique({
+      where: {
+        userId_groupId: {
+          userId: session.user.id,
+          groupId
+        }
+      }
+    })
+
+    if (!membership) {
+      return NextResponse.json({ error: 'No eres miembro del grupo' }, { status: 403 })
+    }
+
+    const player = await prisma.player.findFirst({
+      where: { id: playerId, groupId }
+    })
+
+    if (!player) {
+      return NextResponse.json({ error: 'Jugador no encontrado' }, { status: 404 })
+    }
+
+    const rating = await prisma.rating.findUnique({
+      where: {
+        playerId_userId: {
+          playerId,
+          userId: session.user.id
+        }
+      }
+    })
+
+    return NextResponse.json({
+      player: { id: player.id, name: player.name },
+      rating: rating?.score || null
+    })
+  } catch (error) {
+    console.error('Error fetching rating:', error)
+    return NextResponse.json({ error: 'Error al obtener puntaje' }, { status: 500 })
+  }
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ groupId: string; playerId: string }> }
