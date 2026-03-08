@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function NewGroupPage() {
   const router = useRouter()
@@ -39,15 +38,11 @@ export default function NewGroupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-lg">
+    <div>
+      <div className="mb-6">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8 transition-colors"
+          className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-4 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -55,7 +50,7 @@ export default function NewGroupPage() {
           Volver
         </button>
 
-        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-8">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 sm:p-8 max-w-lg">
           <h1 className="text-2xl font-bold text-[var(--foreground)] mb-6">Crear Nuevo Grupo</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
