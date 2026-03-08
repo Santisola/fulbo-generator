@@ -23,13 +23,11 @@ interface Incompatibility {
 
 const TYPE_DESCRIPTIONS = {
   CANNOT_FACE_EACH_OTHER: {
-    label: 'No pueden jugar enfrentados',
-    description: 'Los jugadores no pueden estar en equipos opuestos',
+    label: 'Equipos separados',
     icon: '⚡'
   },
   MUST_BE_ON_SAME_TEAM: {
-    label: 'Deben estar en el mismo equipo',
-    description: 'Los jugadores siempre deben estar juntos',
+    label: 'Mismo equipo',
     icon: '🤝'
   }
 }
@@ -261,7 +259,7 @@ export default function IncompatibilitiesPage({
                 </label>
                 <div className="space-y-2">
                   {Object.entries(TYPE_DESCRIPTIONS).map(([key, desc]) => (
-                    <label key={key} className="flex items-start gap-3 p-3 border border-[var(--border)] rounded-lg cursor-pointer hover:bg-[var(--secondary)] transition-colors" style={{
+                    <label key={key} className="flex items-center gap-3 p-2.5 border border-[var(--border)] rounded-lg cursor-pointer hover:bg-[var(--secondary)] transition-colors" style={{
                       borderColor: selectedType === key ? 'var(--primary)' : 'var(--border)',
                       backgroundColor: selectedType === key ? 'var(--primary)/10' : 'transparent'
                     }}>
@@ -271,15 +269,10 @@ export default function IncompatibilitiesPage({
                         value={key}
                         checked={selectedType === key}
                         onChange={(e) => setSelectedType(e.target.value as any)}
-                        className="mt-1"
+                        className="mt-0.5"
                       />
-                      <div className="flex-1">
-                        <div className="font-medium text-[var(--foreground)]">
-                          {desc.icon} {desc.label}
-                        </div>
-                        <div className="text-xs text-[var(--muted-foreground)] mt-1">
-                          {desc.description}
-                        </div>
+                      <div className="font-medium text-[var(--foreground)]">
+                        {desc.icon} {desc.label}
                       </div>
                     </label>
                   ))}
@@ -328,15 +321,15 @@ export default function IncompatibilitiesPage({
                     <div key={incompat.id} className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-2">
                             <span className="text-lg">{typeDesc.icon}</span>
                             <p className="font-medium text-[var(--foreground)]">
                               {incompat.player1.name} & {incompat.player2.name}
                             </p>
+                            <span className="text-xs bg-[var(--primary)]/10 text-[var(--primary)] px-2 py-1 rounded font-medium ml-auto">
+                              {typeDesc.label}
+                            </span>
                           </div>
-                          <p className="text-xs text-[var(--primary)] mb-2">
-                            {typeDesc.label}
-                          </p>
                           {incompat.reason && (
                             <p className="text-sm text-[var(--muted-foreground)]">
                               {editingId === incompat.id ? (
