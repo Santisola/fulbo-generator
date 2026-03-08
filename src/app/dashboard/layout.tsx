@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { FloatingGuideButton } from '@/components/FloatingGuideButton'
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      <FloatingGuideButton />
       <header className="bg-[var(--card)] border-b border-[var(--border)] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">

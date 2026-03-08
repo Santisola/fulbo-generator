@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
 import Link from 'next/link'
-import { HelpTooltip } from '@/components/HelpTooltip'
 
 interface Player {
   id: string
@@ -257,54 +256,34 @@ export default function IncompatibilitiesPage({
               </div>
 
               <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <label className="block text-sm font-medium text-[var(--muted-foreground)]">
-                    Tipo de Restricción
-                  </label>
-                  <HelpTooltip
-                    title="Tipos de Restricciones"
-                    content={
-                      <div className="space-y-2">
-                        <p><strong>⚡ No pueden jugar enfrentados:</strong> Los jugadores no pueden estar en equipos opuestos. Úsalo cuando hay conflicto entre personas.</p>
-                        <p><strong>🤝 Deben estar en mismo equipo:</strong> Los jugadores siempre deben estar juntos en el mismo equipo. Úsalo para amigos, hermanos o compañeros que siempre juegan juntos.</p>
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-3">
+                  Tipo de Restricción
+                </label>
+                <div className="space-y-2">
+                  {Object.entries(TYPE_DESCRIPTIONS).map(([key, desc]) => (
+                    <label key={key} className="flex items-start gap-3 p-3 border border-[var(--border)] rounded-lg cursor-pointer hover:bg-[var(--secondary)] transition-colors" style={{
+                      borderColor: selectedType === key ? 'var(--primary)' : 'var(--border)',
+                      backgroundColor: selectedType === key ? 'var(--primary)/10' : 'transparent'
+                    }}>
+                      <input
+                        type="radio"
+                        name="type"
+                        value={key}
+                        checked={selectedType === key}
+                        onChange={(e) => setSelectedType(e.target.value as any)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-[var(--foreground)]">
+                          {desc.icon} {desc.label}
+                        </div>
+                        <div className="text-xs text-[var(--muted-foreground)] mt-1">
+                          {desc.description}
+                        </div>
                       </div>
-                    }
-                    position="right"
-                  />
+                    </label>
+                  ))}
                 </div>
-                 <div className="space-y-2">
-                   {Object.entries(TYPE_DESCRIPTIONS).map(([key, desc]) => (
-                     <label key={key} className="flex items-start gap-3 p-3 border border-[var(--border)] rounded-lg cursor-pointer hover:bg-[var(--secondary)] transition-colors" style={{
-                       borderColor: selectedType === key ? 'var(--primary)' : 'var(--border)',
-                       backgroundColor: selectedType === key ? 'var(--primary)/10' : 'transparent'
-                     }}>
-                       <input
-                         type="radio"
-                         name="type"
-                         value={key}
-                         checked={selectedType === key}
-                         onChange={(e) => setSelectedType(e.target.value as any)}
-                         className="mt-1"
-                       />
-                       <div className="flex-1">
-                         <div className="flex items-center gap-1">
-                           <span className="font-medium text-[var(--foreground)]">
-                             {desc.icon} {desc.label}
-                           </span>
-                           <HelpTooltip
-                             title={desc.label}
-                             content={desc.description}
-                             position="top"
-                             className="inline-block"
-                           />
-                         </div>
-                         <div className="text-xs text-[var(--muted-foreground)] mt-1">
-                           {desc.description}
-                         </div>
-                       </div>
-                     </label>
-                   ))}
-                 </div>
               </div>
 
               <div>
