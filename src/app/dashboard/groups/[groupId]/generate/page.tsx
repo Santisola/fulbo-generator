@@ -88,8 +88,8 @@ export default function GenerateTeamsPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] p-6">
-      <div className="absolute top-6 right-6">
+    <div className="min-h-screen bg-[var(--background)] p-4 sm:p-6">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
         <ThemeToggle />
       </div>
 
@@ -123,7 +123,7 @@ export default function GenerateTeamsPage({
               <span className="text-[var(--primary)]"> puntos</span>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-3 sm:gap-6 md:grid-cols-2">
               <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
                 <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center text-sm font-bold">

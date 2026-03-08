@@ -85,7 +85,7 @@ export default async function GroupDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-8 lg:grid-cols-2">
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-[var(--foreground)]">Jugadores</h2>
@@ -213,11 +213,11 @@ export default async function GroupDetailPage({
       </div>
 
        {group.players.length >= 4 && (
-         <div className="mt-8 flex gap-4">
+         <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
            {isAdmin && (
              <Link
                href={`/dashboard/groups/${groupId}/incompatibilities`}
-               className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--secondary)] text-[var(--foreground)] font-semibold rounded-xl hover:opacity-90 transition-all border border-[var(--border)]"
+               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--secondary)] text-[var(--foreground)] font-semibold rounded-xl hover:opacity-90 transition-all border border-[var(--border)]"
              >
                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-6a2 2 0 00-2-2H7a2 2 0 00-2 2v6a2 2 0 002 2h3a2 2 0 002-2v-6zm6-4h.01M19 11a2 2 0 11-4 0 2 2 0 014 0zm0 4a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -227,7 +227,7 @@ export default async function GroupDetailPage({
            )}
            <Link
              href={`/dashboard/groups/${groupId}/generate`}
-             className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold rounded-xl hover:opacity-90 transition-all"
+             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold rounded-xl hover:opacity-90 transition-all"
            >
              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

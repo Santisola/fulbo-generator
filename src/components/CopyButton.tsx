@@ -20,7 +20,7 @@ export function CopyButton({ code }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className="text-gray-400 hover:text-gray-600"
+      className="p-2.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors inline-flex items-center justify-center"
       title="Copiar link de invitación"
     >
       {copied ? (

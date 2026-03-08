@@ -33,17 +33,17 @@ export default function DashboardLayout({
                 </Link>
               </nav>
             </div>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <div className="h-6 w-px bg-[var(--border)]"></div>
-              <span className="text-[var(--foreground)] hidden sm:block">{session.user?.name || session.user?.email}</span>
-              <button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-sm"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
+             <div className="flex items-center gap-2 sm:gap-3">
+               <ThemeToggle />
+               <div className="h-6 w-px bg-[var(--border)] hidden sm:block"></div>
+               <span className="text-[var(--foreground)] hidden sm:block text-sm">{session.user?.name || session.user?.email}</span>
+               <button
+                 onClick={() => signOut({ callbackUrl: '/' })}
+                 className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5"
+               >
+                 Salir
+               </button>
+             </div>
           </div>
         </div>
       </header>

@@ -130,7 +130,7 @@ export default function RatePlayerPage({
                   max="10"
                   value={score}
                   onChange={(e) => setScore(parseInt(e.target.value))}
-                  className="flex-1 h-3 bg-[var(--input)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
+                  className="flex-1 h-8 bg-[var(--input)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
                 />
                 <span className="text-2xl font-bold text-[var(--muted-foreground)]">10</span>
               </div>

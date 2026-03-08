@@ -217,7 +217,7 @@ export default function IncompatibilitiesPage({
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Formulario */}
         <div className="lg:col-span-1">
-          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 sticky top-6">
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 sm:sticky top-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Agregar Restricción
             </h2>
@@ -295,7 +295,7 @@ export default function IncompatibilitiesPage({
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Ej: Conflicto personal, hermanos, etc."
                   maxLength={255}
-                  className="w-full px-3 py-2 bg-[var(--input)] border border-[var(--border)] rounded-lg text-[var(--foreground)] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                  className="w-full px-3 py-2 text-base bg-[var(--input)] border border-[var(--border)] rounded-lg text-[var(--foreground)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   rows={3}
                 />
               </div>
@@ -340,13 +340,13 @@ export default function IncompatibilitiesPage({
                           {incompat.reason && (
                             <p className="text-sm text-[var(--muted-foreground)]">
                               {editingId === incompat.id ? (
-                                <textarea
-                                  value={editingReason}
-                                  onChange={(e) => setEditingReason(e.target.value)}
-                                  maxLength={255}
-                                  className="w-full px-2 py-1 bg-[var(--input)] border border-[var(--border)] rounded text-sm text-[var(--foreground)] resize-none"
-                                  rows={2}
-                                />
+                                 <textarea
+                                   value={editingReason}
+                                   onChange={(e) => setEditingReason(e.target.value)}
+                                   maxLength={255}
+                                   className="w-full px-2 py-1 text-base bg-[var(--input)] border border-[var(--border)] rounded text-sm text-[var(--foreground)] resize-none"
+                                   rows={2}
+                                 />
                               ) : (
                                 <>Razón: {incompat.reason}</>
                               )}
