@@ -68,28 +68,30 @@ export function AppGuide({ isOpen, onClose }: AppGuideProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] max-w-2xl w-full max-h-[90vh] overflow-auto">
-        <div className="sticky top-0 bg-[var(--card)] border-b border-[var(--border)] p-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-[var(--foreground)]">Guía de la App</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] w-full max-w-2xl my-auto flex flex-col max-h-[90vh] sm:max-h-[95vh]">
+        {/* Header */}
+        <div className="flex-shrink-0 sticky top-0 bg-[var(--card)] border-b border-[var(--border)] p-4 sm:p-6 flex justify-between items-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Guía de la App</h2>
           <button
             onClick={onClose}
-            className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+            className="flex-shrink-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-lg"
           >
             ✕
           </button>
         </div>
 
-        <div className="p-8 space-y-6">
+        {/* Content - scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6">
           {/* Icono y Título */}
           <div className="text-center">
-            <div className="text-5xl mb-4">{currentStepData.icon}</div>
-            <h3 className="text-2xl font-bold text-[var(--foreground)]">{currentStepData.title}</h3>
+            <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">{currentStepData.icon}</div>
+            <h3 className="text-lg sm:text-2xl font-bold text-[var(--foreground)]">{currentStepData.title}</h3>
           </div>
 
           {/* Descripción */}
-          <div className="bg-[var(--secondary)] rounded-lg p-4">
-            <p className="text-[var(--muted-foreground)] whitespace-pre-wrap leading-relaxed">
+          <div className="bg-[var(--secondary)] rounded-lg p-3 sm:p-4">
+            <p className="text-sm sm:text-base text-[var(--muted-foreground)] whitespace-pre-wrap leading-relaxed">
               {currentStepData.description}
             </p>
           </div>
@@ -117,26 +119,26 @@ export function AppGuide({ isOpen, onClose }: AppGuideProps) {
         </div>
 
         {/* Botones de navegación */}
-        <div className="sticky bottom-0 bg-[var(--card)] border-t border-[var(--border)] p-6 flex gap-3 justify-between">
+        <div className="flex-shrink-0 sticky bottom-0 bg-[var(--card)] border-t border-[var(--border)] p-4 sm:p-6 gap-2 sm:gap-3 flex flex-col sm:flex-row justify-between">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="px-6 py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="px-4 sm:px-6 py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity text-sm sm:text-base"
           >
             ← Anterior
           </button>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90"
+              className="px-4 sm:px-6 py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90 text-sm sm:text-base"
             >
               Cerrar
             </button>
             <button
               onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
               disabled={currentStep === steps.length - 1}
-              className="px-6 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="px-4 sm:px-6 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity text-sm sm:text-base"
             >
               Siguiente →
             </button>
