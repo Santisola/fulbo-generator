@@ -1,0 +1,207 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    SISTEMA DE INVITACIONES A GRUPOS                        ║
+║                        Arquitectura & Flujos                               ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 1. GENERACIÓN DEL CÓDIGO DE INVITACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CUÁNDO:         Cuando admin crea un grupo
+  DÓNDE:          POST /api/groups/route.ts → generateCode()
+  QUÉ GENERA:     6 caracteres: A-Z (sin 0,1,O,I) + 2-9
+  EJEMPLO:        "A2B3C4" o "XYZ789"
+  BD:             Tabla Group → campo "code" (UNIQUE)
+  VALIDACIÓN:     Se reintenta hasta 10x si ya existe
+
+  generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    return chars aleatorios [6 veces]
+  }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 2. LINK DE INVITACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  PATRÓN:         https://[domain]/join/[CODE]
+  GENERADO EN:    CopyButton.tsx → handleCopy()
+  MOSTRADO EN:    /dashboard/groups/[groupId]
+  CÓMO COPIA:     navigator.clipboard.writeText(url)
+
+  const url = `${window.location.origin}/join/${code}`
+  // Ejemplo: https://fulboteams.com/join/A2B3C4
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 3. PÁGINA DE INVITACIÓN: /join/[code]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ARCHIVO:        src/app/join/[code]/page.tsx
+  COMPONENTE:     JoinGroupPage
+  PÚBLICO:        SÍ (sin autenticación requerida)
+  PARÁMETROS:     [code] → params.code
+
+  ┌─────────────────────────────────────┐
+  │ useEffect 1: Cargar datos del grupo │
+  ├─────────────────────────────────────┤
+  │ fetch /api/groups/info/[code]       │
+  │ → setGroupName(data.name)           │
+  │ → Valida que existe                 │
+  └─────────────────────────────────────┘
+           │
+           ▼
+  ┌─────────────────────────────────────┐
+  │ useEffect 2: Monitorear sesión      │
+  ├─────────────────────────────────────┤
+  │ if (session) → handleJoin()         │
+  │ Auto-ejecuta cuando user se loguea  │
+  └─────────────────────────────────────┘
+
+  LÓGICA:
+  ┌─ ¿Usuario autenticado (session)?
+  │
+  ├─ NO  → Mostrar: "Necesitás iniciar sesión"
+  │        Botón: "Iniciar Sesión"
+  │
+  └─ SÍ  → Ejecutar handleJoin()
+           → POST /api/groups/join { code }
+           → Si éxito: router.push(/dashboard/groups/[groupId])
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 4. ENDPOINTS API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  A) GET /api/groups/info/[code]
+  ┌─────────────────────────────────────────┐
+  │ PROPÓSITO: Obtener datos del grupo      │
+  │ AUTENTICACIÓN: NO REQUERIDA             │
+  │ PARÁMETRO: code (URL param)             │
+  │                                         │
+  │ RESPUESTA 200:                          │
+  │ { id: "...", name: "Los Gallos" }       │
+  │                                         │
+  │ RESPUESTA 404:                          │
+  │ { error: "Grupo no encontrado" }        │
+  └─────────────────────────────────────────┘
+
+  B) POST /api/groups/join
+  ┌─────────────────────────────────────────┐
+  │ PROPÓSITO: Registrar user a grupo       │
+  │ AUTENTICACIÓN: REQUERIDA (NextAuth)     │
+  │ BODY: { code: "A2B3C4" }                │
+  │                                         │
+  │ PROCESO:                                │
+  │ 1. Obtiene userId de sesión             │
+  │ 2. Busca grupo por code                 │
+  │ 3. Verifica no sea miembro              │
+  │ 4. Crea GroupMember (role: MEMBER)      │
+  │ 5. Devuelve { groupId: "..." }          │
+  │                                         │
+  │ RESPUESTA 200:                          │
+  │ { success: true, groupId: "..." }       │
+  │                                         │
+  │ RESPUESTA 400:                          │
+  │ { error: "Ya eres miembro" }             │
+  │ { error: "Código inválido" }             │
+  └─────────────────────────────────────────┘
+
+  C) POST /api/auth/register
+  ┌─────────────────────────────────────────┐
+  │ PROPÓSITO: Crear nueva cuenta           │
+  │ AUTENTICACIÓN: NO REQUERIDA             │
+  │ BODY:                                   │
+  │ {                                       │
+  │   email: "usuario@mail.com",            │
+  │   password: "miPass123",                │
+  │   name: "Juan Pérez"                    │
+  │ }                                       │
+  │                                         │
+  │ VALIDACIONES (ZOD):                     │
+  │ - email: válido                         │
+  │ - password: min 6 chars                 │
+  │ - name: min 2 chars                     │
+  │                                         │
+  │ RESPUESTA 200:                          │
+  │ { id: "...", email: "...", name: "..." }│
+  │                                         │
+  │ RESPUESTA 400:                          │
+  │ { error: "El email ya está registrado" }│
+  └─────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 5. FLUJOS DE USUARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  FLUJO A: Usuario YA registrado
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Clica: https://app.com/join/A2B3C4
+  2. Llega a: /join/A2B3C4
+  3. useEffect 2: Detecta sesión activa
+  4. handleJoin(): POST /api/groups/join
+  5. Sistema lo registra al grupo (rol: MEMBER)
+  6. router.push(/dashboard/groups/[groupId])
+  7. ✓ Usuario ya está en el grupo
+
+  TIEMPO TOTAL: ~1-2 segundos
+
+
+  FLUJO B: Usuario NO registrado (CREATE ACCOUNT)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Clica: https://app.com/join/A2B3C4
+  2. Llega a: /join/A2B3C4
+  3. useSession: session = null
+  4. Muestra: "Necesitás iniciar sesión"
+  5. Click: Botón "Iniciar Sesión"
+  6. Redirige a: /login (❌ PROBLEMA: Sin parámetro de retorno)
+  7. Usuario ve formulario de login
+  8. Submite credenciales
+  9. signIn('credentials', { redirect: false })
+  10. router.push('/dashboard') ← ❌ NO vuelve a /join/[code]
+  11. Usuario está en /dashboard, NO unido al grupo
+  12. ❌ FLUJO INCOMPLETO
+
+
+  FLUJO C: Usuario NO registrado (SIGN UP)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Clica: https://app.com/join/A2B3C4
+  2. Llega a: /join/A2B3C4
+  3. useSession: session = null
+  4. Click: "Crear Cuenta" (Link a /register)
+  5. Muestra: Formulario de registro
+  6. Llena: email, password, name
+  7. Submite
+  8. POST /api/auth/register → Crea usuario
+  9. signIn('credentials', { redirect: false }) → Login auto
+  10. router.push('/dashboard') ← ❌ NO vuelve a /join/[code]
+  11. Usuario en /dashboard, NO unido al grupo
+  12. ❌ FLUJO INCOMPLETO
+
+
+  FLUJO D: Usuario con Google OAuth
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Clica: https://app.com/join/A2B3C4
+  2. Click: Botón "Continuar con Google"
+  3. signIn('google', { callbackUrl: '/dashboard' })
+  4. Google OAuth flow...
+  5. Auto-crea usuario si no existe
+  6. callbackUrl: '/dashboard' ← ❌ Hardcoded, NO /join/[code]
+  7. Usuario en /dashboard, NO unido al grupo
+  8. ❌ FLUJO INCOMPLETO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 6. TABLA DE BASES DE DATOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  TABLE: Group
+  ┌──────────────────┬───────┬──────────────────────┐
+  │ Campo            │ Tipo  │ Notas                │
+  ├──────────────────┼───────┼──────────────────────┤
+  │ id               │ CUID  │ Primary Key          │
+  │ name             │ TEXT  │ Nombre grupo         │
+  │ code             │ TEXT  │ ← UNIQUE (6 chars)   │
+  │ createdById      │ CUID  │ FK → User.id         │
+  │ createdAt        │ DATE  │ Timestamp            │
+  └──────────────────┴───────┴──────────────────────┘
+
+  TABLE: GroupMember
+  ┌──────────────────┬───────┬──────────────────────┐
+  │ Campo            │ 

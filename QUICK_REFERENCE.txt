@@ -1,0 +1,238 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║          QUICK REFERENCE: Sistema de Invitaciones a Grupos                 ║
+║                        Fulbo Teams App                                     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 1. GENERACIÓN DE CÓDIGO                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  DÓNDE:      src/app/api/groups/route.ts → generateCode()
+  CUÁNDO:     Al crear grupo (POST /api/groups)
+  FORMATO:    6 caracteres: A-Z (no 0,1,O,I) + 2-9
+  VALIDACIÓN: UNIQUE en BD + reintentos hasta 10x
+  EJEMPLO:    ABC2XZ, KLM456, XYZ789
+
+  function generateCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    let code = ''
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return code
+  }
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 2. URL DE INVITACIÓN                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  PATRÓN:       https://[domain]/join/[CODE]
+  EJEMPLO:      https://fulboteams.com/join/ABC2XZ
+  GENERADO EN:  CopyButton.tsx → handleCopy()
+  MOSTRADO EN:  /dashboard/groups/[groupId]
+
+  const url = `${window.location.origin}/join/${code}`
+  await navigator.clipboard.writeText(url)
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 3. PÁGINA DE INVITACIÓN                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  RUTA:        /join/[code]
+  ARCHIVO:     src/app/join/[code]/page.tsx
+  COMPONENTE:  JoinGroupPage
+  PÚBLICO:     SÍ (sin auth requerida)
+  PARÁMETRO:   [code] → params.code (6 caracteres)
+
+  ┌─ useEffect 1: Cargar datos del grupo
+  │  fetch /api/groups/info/[code]
+  │  → setGroupName(data.name)
+  │
+  └─ useEffect 2: Monitorear sesión
+     if (session) → handleJoin()
+     ↓
+     ¿Session?
+     ├─ NO  → Botón "Iniciar Sesión"
+     └─ SÍ  → POST /api/groups/join
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 4. ENDPOINTS API                                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  A) GET /api/groups/info/[code]
+  ├─ Auth:        NO REQUERIDA
+  ├─ Param:       code (URL)
+  ├─ Response:    { id, name }
+  └─ Error:       404 "Grupo no encontrado"
+
+  B) POST /api/groups/join
+  ├─ Auth:        REQUERIDA (NextAuth)
+  ├─ Body:        { code }
+  ├─ Process:     Obtiene userId → Busca grupo → Crea GroupMember
+  ├─ Response:    { success: true, groupId }
+  └─ Errors:      401, 400, 404, 500
+
+  C) POST /api/auth/register
+  ├─ Auth:        NO REQUERIDA
+  ├─ Body:        { email, password, name }
+  ├─ Validate:    email válido, password ≥6, name ≥2
+  ├─ Process:     Hash password → Crea User en BD
+  ├─ Response:    { id, email, name }
+  └─ Errors:      400 (email existe), 500
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 5. FLUJOS DE USUARIO                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  FLUJO A: Usuario YA REGISTRADO
+  1. Clica: /join/ABC2XZ
+  2. useSession detecta sesión
+  3. handleJoin() → POST /api/groups/join
+  4. router.push(/dashboard/groups/[groupId])
+  ✓ 1-2 segundos
+  ✓ FUNCIONA PERFECTO
+
+  FLUJO B: Usuario SIN CUENTA (Create Account)
+  1. Clica: /join/ABC2XZ
+  2. Click "Crear Cuenta" → /register
+  3. Rellena: email, password, name
+  4. POST /api/auth/register → Crea usuario
+  5. signIn() automático
+  6. router.push('/dashboard') ← ❌ PROBLEMA
+  ❌ NO vuelve a /join/[code]
+  ❌ Usuario NO se une al grupo
+
+  FLUJO C: Usuario SIN CUENTA (Sign In)
+  1. Clica: /join/ABC2XZ
+  2. Click "Iniciar Sesión" → /login
+  3. Ingresa credenciales existentes
+  4. signIn() OK
+  5. router.push('/dashboard') ← ❌ PROBLEMA
+  ❌ NO vuelve a /join/[code]
+  ❌ Usuario NO se une al grupo
+
+  FLUJO D: Google OAuth
+  1. Clica: /join/ABC2XZ
+  2. Click "Google"
+  3. signIn('google', { callbackUrl: '/dashboard' })
+  4. ❌ callbackUrl hardcodeado
+  ❌ NO vuelve a /join/[code]
+  ❌ Usuario NO se une al grupo
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 6. BASE DE DATOS                                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  TABLE: Group
+  ├─ id (CUID, PK)
+  ├─ name (STRING)
+  ├─ code (STRING, UNIQUE) ← El código de 6 chars
+  ├─ createdById (CUID, FK → User.id)
+  └─ createdAt (DATETIME)
+
+  TABLE: GroupMember
+  ├─ id (CUID, PK)
+  ├─ userId (CUID, FK → User.id)
+  ├─ groupId (CUID, FK → Group.id)
+  ├─ role (ENUM: ADMIN | MEMBER)
+  ├─ joinedAt (DATETIME)
+  └─ CONSTRAINT UNIQUE(userId, groupId)
+
+  TABLE: User
+  ├─ id (CUID, PK)
+  ├─ email (STRING, UNIQUE)
+  ├─ password (STRING, bcrypt)
+  ├─ name (STRING, nullable)
+  ├─ image (STRING, nullable)
+  └─ createdAt (DATETIME)
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 7. RUTAS RELACIONADAS                                                    ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  PÚBLICAS (sin auth):
+  └─ GET  /join/[code] ........................... Página invitación
+  └─ GET  /api/groups/info/[code] ............... Info del grupo
+  └─ POST /api/groups/join ....................... Unirse a grupo
+  └─ POST /api/auth/register ..................... Crear usuario
+  └─ GET  /register ............................. Página registro
+  └─ GET  /login ................................ Página login
+
+  PROTEGIDAS (con auth):
+  └─ GET  /dashboard ............................ Dashboard
+  └─ GET  /dashboard/groups/[groupId] .......... Detalles grupo
+  └─ POST /api/groups .......................... Crear grupo
+  └─ [otros endpoints de dashboard]
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 8. PROBLEMAS IDENTIFICADOS                                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  ✗ SIN PARÁMETRO "returnTo" EN LOGIN/REGISTER
+  → User va a /login sin saber que vino de /join/ABC2XZ
+  → Después de login: router.push('/dashboard')
+  → NO vuelve a /join/[code]
+
+  ✗ HARDCODEADO callbackUrl A '/dashboard'
+  → Google OAuth: { callbackUrl: '/dashboard' }
+  → NO es dinámico según intent
+
+  ✗ handleJoin() SOLO EN /join/[code]
+  → Si user se registra en /register
+  → Nunca ejecuta handleJoin()
+  → NO se une al grupo
+
+  ✗ SIN MEMORIA DE INTENCIÓN
+  → Si pierde conexión o cierra navegador
+  → Pierde el context: "quería unirse a grupo X"
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 9. SOLUCIONES RECOMENDADAS                                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  OPCIÓN A: Query Parameter "returnTo" ⭐ RECOMENDADA
+  ──────────────────────────────────────
+  Complejidad:   ⭐ FÁCIL
+  Estándar:      ⭐⭐ Común en web
+  Líneas código: 10-15
+
+  Implementación:
+  1. /join/[code] → Link "Crear Cuenta":
+     href="/register?returnTo=%2Fjoin%2FABC2XZ"
+
+  2. /register → Leer y guardar:
+     const { returnTo } = useSearchParams()
+     router.push(returnTo || '/dashboard')
+
+  3. Mismo en /login
+
+  Ventajas:
+  ✓ Simple
+  ✓ Sin dependencias externas
+  ✓ Funciona en todos los flujos
+  ✓ Estándar web
+  ✓ ~30 minutos implementación
+
+
+  OPCIÓN B: NextAuth callbackUrl
+  ──────────────────────────────
+  Complejidad:   ⭐⭐ MEDIO
+  Estándar:      ⭐⭐⭐ NextAuth oficial
+  Líneas código: 20-25
+
+  Implementación:
+  signIn('credentials', {
+    email, password,
+    redirect: false,
+    callbackUrl: `/join/${code}` ← HACER DINÁMICO
+  })
+
+
+  OPCIÓN C: Zustand Store
+  ───────────────────────
+  Complejidad:   ⭐⭐⭐ COMPLEJO
+  Estándar:      ⭐⭐ No estándar
+  Líneas código: 30+
+
+  Implementación:
+  useInvi

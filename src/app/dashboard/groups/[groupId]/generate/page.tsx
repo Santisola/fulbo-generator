@@ -98,7 +98,7 @@ export default function GenerateTeamsPage({
       .map((player, i) => `${i + 1}. ${player.name}`)
       .join('\n')
 
-    return `*Equipo A*\n${teamAList}\n\n*Equipo B*\n${teamBList}`
+    return `\n${teamAList}\n\n\n${teamBList}`
   }
 
   const handleShareWhatsApp = () => {
