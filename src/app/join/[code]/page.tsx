@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function JoinGroupPage() {
@@ -95,12 +95,12 @@ export default function JoinGroupPage() {
           <p className="text-[var(--muted-foreground)] mb-6">
             Necesitás iniciar sesión para unirte al grupo
           </p>
-          <button
-            onClick={() => signIn('credentials', { callbackUrl: returnTo })}
-            className="w-full py-3.5 bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold rounded-xl hover:opacity-90 transition-all"
+          <a
+            href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
+            className="w-full py-3.5 bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold rounded-xl hover:opacity-90 transition-all inline-block text-center"
           >
             Iniciar Sesión
-          </button>
+          </a>
           <p className="text-[var(--muted-foreground)] text-sm mt-4">
             ¿No tenés cuenta?{' '}
             <a href={`/register?returnTo=${encodeURIComponent(returnTo)}`} className="text-[var(--primary)] font-medium hover:underline">
