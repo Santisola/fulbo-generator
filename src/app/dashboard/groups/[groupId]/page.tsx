@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CopyButton } from '@/components/CopyButton'
+import GroupMembersClient from '@/components/GroupMembersClient'
 
 async function getGroup(groupId: string, userId: string) {
   const membership = await prisma.groupMember.findUnique({
@@ -160,27 +161,12 @@ export default async function GroupDetailPage({
         <div>
           <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">Miembros</h2>
           
-          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)]">
-            {group.members.map((member) => (
-              <div key={member.id} className="p-4 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-[var(--secondary)] rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-[var(--foreground)]">
-                      {member.user.name?.[0] || member.user.email[0].toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="font-medium text-[var(--foreground)]">
-                    {member.user.name || member.user.email}
-                  </span>
-                </div>
-                {member.role === 'ADMIN' && (
-                  <span className="text-xs bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 rounded-full font-medium">
-                    Admin
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+          <GroupMembersClient
+            members={group.members}
+            groupId={groupId}
+            isAdmin={isAdmin}
+            currentUserId={session.user.id}
+          />
 
           {group.teamHistory.length > 0 && (
             <div className="mt-8">
