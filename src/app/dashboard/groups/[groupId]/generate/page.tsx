@@ -87,6 +87,27 @@ export default function GenerateTeamsPage({
     setLoading(false)
   }
 
+  const formatTeamsMessage = () => {
+    if (!result) return ''
+
+    const teamAList = result.teamA
+      .map((player, i) => `${i + 1}. ${player.name}`)
+      .join('\n')
+
+    const teamBList = result.teamB
+      .map((player, i) => `${i + 1}. ${player.name}`)
+      .join('\n')
+
+    return `*Equipo A*\n${teamAList}\n\n*Equipo B*\n${teamBList}`
+  }
+
+  const handleShareWhatsApp = () => {
+    const message = formatTeamsMessage()
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`
+    window.open(whatsappUrl, '_blank')
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)] p-4 sm:p-6">
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
@@ -175,6 +196,15 @@ export default function GenerateTeamsPage({
                 className="flex-1 py-3.5 bg-[var(--secondary)] text-[var(--foreground)] font-semibold rounded-xl hover:opacity-80 transition-all border border-[var(--border)]"
               >
                 Volver a seleccionar
+              </button>
+              <button
+                onClick={handleShareWhatsApp}
+                className="flex-1 py-3.5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-9.746 9.798c0 2.715.738 5.365 2.138 7.684L2.821 24l8.115-2.129c2.248 1.227 4.773 1.871 7.409 1.871 5.487 0 9.971-4.414 9.991-9.798 0-2.617-.738-5.074-2.138-7.148A9.9 9.9 0 0011.75 2.352c-5.486 0-9.971 4.415-9.971 9.847z"/>
+                </svg>
+                Compartir por WhatsApp
               </button>
               <button
                 onClick={() => router.push(`/dashboard/groups/${groupId}`)}
