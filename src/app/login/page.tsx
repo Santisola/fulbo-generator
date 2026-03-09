@@ -1,13 +1,15 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo') || '/dashboard'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -28,12 +30,15 @@ export default function LoginPage() {
       setError('Email o contraseña incorrectos')
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push(returnTo)
     }
   }
 
   const handleGoogleLogin = () => {
-    signIn('google', { callbackUrl: '/dashboard' })
+    signIn('google', { 
+      callbackUrl: returnTo,
+      redirect: true 
+    })
   }
 
   return (
@@ -127,11 +132,26 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-[var(--muted-foreground)] text-sm">
           ¿No tenés cuenta?{' '}
-          <Link href="/register" className="text-[var(--primary)] font-medium hover:underline">
+          <Link href={`/register?returnTo=${encodeURIComponent(returnTo)}`} className="text-[var(--primary)] font-medium hover:underline">
             Registrate
           </Link>
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-[var(--muted-foreground)]">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

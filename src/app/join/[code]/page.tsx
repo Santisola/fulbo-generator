@@ -75,6 +75,8 @@ export default function JoinGroupPage() {
   }
 
   if (!session) {
+    const returnTo = `/join/${code}`
+    
     return (
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
         <div className="absolute top-6 right-6">
@@ -94,11 +96,17 @@ export default function JoinGroupPage() {
             Necesitás iniciar sesión para unirte al grupo
           </p>
           <button
-            onClick={() => signIn()}
+            onClick={() => signIn('credentials', { callbackUrl: returnTo })}
             className="w-full py-3.5 bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold rounded-xl hover:opacity-90 transition-all"
           >
             Iniciar Sesión
           </button>
+          <p className="text-[var(--muted-foreground)] text-sm mt-4">
+            ¿No tenés cuenta?{' '}
+            <a href={`/register?returnTo=${encodeURIComponent(returnTo)}`} className="text-[var(--primary)] font-medium hover:underline">
+              Registrate aquí
+            </a>
+          </p>
         </div>
       </div>
     )
