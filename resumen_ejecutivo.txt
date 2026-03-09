@@ -1,0 +1,237 @@
+================================================================================
+                    ANÁLISIS TÉCNICO EJECUTIVO
+                   Fulbo Teams Generator (v0.1.0)
+================================================================================
+
+PROYECTO: Generador de equipos de fútbol 5 equilibrados y justos
+UBICACIÓN: C:\Santi\proyectos\fulbo-generator
+FECHA: 9 de marzo de 2026
+
+================================================================================
+1. STACK TECNOLÓGICO
+================================================================================
+
+FRONTEND:
+  ├─ Next.js 16.1.6 (App Router, SSR/SSG)
+  ├─ React 19.2.3 (UI Components)
+  ├─ TypeScript 5 (Tipado estático)
+  ├─ Tailwind CSS 4 (Estilos utility-first)
+  ├─ React Query 5.90.21 (Data fetching)
+  └─ Zustand 5.0.11 (Estado global)
+
+BACKEND:
+  ├─ Next.js 16.1.6 (API Routes)
+  ├─ Prisma 5.22.0 (ORM type-safe)
+  ├─ PostgreSQL (Base de datos)
+  ├─ NextAuth.js 4.24.13 (Autenticación)
+  ├─ bcryptjs 3.0.3 (Encriptación)
+  ├─ Zod 4.3.6 (Validación)
+  └─ Node.js 20+ (Runtime)
+
+HERRAMIENTAS:
+  ├─ ESLint 9 (Linting)
+  ├─ TypeScript Compiler (type-checking)
+  └─ Tailwind CLI (CSS generation)
+
+================================================================================
+2. ESTRUCTURA DEL CÓDIGO
+================================================================================
+
+ARCHIVOS TOTAL: 38 archivos TypeScript/TSX
+LÍNEAS DE CÓDIGO: ~632 (sin node_modules, .next, etc.)
+
+DISTRIBUCIÓN:
+  ├─ Páginas (Pages): 10 routes
+  ├─ Componentes: 8 reutilizables
+  ├─ API Routes: 12 endpoints
+  ├─ Librerías: 2 (auth, prisma)
+  ├─ Modelos BD: 8 entidades
+  └─ Configuración: 6 archivos
+
+MODELOS PRISMA:
+  ├─ User (email, password, name, image)
+  ├─ Group (code, members, players, history)
+  ├─ GroupMember (userId, groupId, role)
+  ├─ Player (name, ratings, averageRating)
+  ├─ Rating (userId, playerId, score 1-10)
+  ├─ TeamHistory (teamA, teamB, averageDiff)
+  ├─ PlayerIncompatibility (type, reason)
+  └─ Enums: Role(ADMIN|MEMBER), CompatibilityType
+
+================================================================================
+3. FUNCIONALIDADES PRINCIPALES
+================================================================================
+
+AUTENTICACIÓN:
+  ✓ Registro con email + contraseña + nombre
+  ✓ Login con credenciales
+  ✓ Google OAuth 2.0
+  ✓ Sesiones JWT persistentes
+  ✓ Hash de passwords con bcryptjs (12 rounds)
+
+GESTIÓN DE GRUPOS:
+  ✓ Crear grupo (genera código único de 6 caracteres)
+  ✓ Unirse a grupo por código
+  ✓ Ver miembros del grupo
+  ✓ Roles: ADMIN (creador), MEMBER (participante)
+  ✓ Solo admins pueden eliminar miembros
+
+JUGADORES Y PUNTUACIÓN:
+  ✓ Agregar jugadores por nombre
+  ✓ Editar nombre de jugador (ADMIN)
+  ✓ Eliminar jugador (ADMIN)
+  ✓ Puntuar jugadores (escala 1-10, oculto)
+  ✓ UN puntaje por usuario-jugador
+  ✓ Promedio calculado automáticamente
+  ✓ Promedio OCULTO hasta generar equipos
+
+INCOMPATIBILIDADES:
+  ✓ CANNOT_FACE_EACH_OTHER: No pueden jugar enfrentados
+  ✓ MUST_BE_ON_SAME_TEAM: Deben estar en el mismo equipo
+  ✓ Solo admins pueden configurar
+  ✓ Algoritmo respeta estas restricciones
+
+GENERACIÓN DE EQUIPOS (CORE):
+  ✓ Algoritmo: 100 intentos de optimización
+  ✓ Minimiza diferencia de promedios
+  ✓ Respeta incompatibilidades
+  ✓ Evita duplicados (últimos 20)
+  ✓ Mínimo 4 jugadores requeridos
+  ✓ Máximo ~5 segundos de procesamiento
+
+HISTORIAL:
+  ✓ Últimos 20 equipos generados
+  ✓ Fecha y hora de generación
+  ✓ Diferencia de promedio entre equipos
+
+INTERFAZ:
+  ✓ Responsive (mobile, tablet, desktop)
+  ✓ Tema dark/light configurable
+  ✓ Navegación intuitiva
+  ✓ Validación de formularios en tiempo real
+
+================================================================================
+4. ARQUITECTURA API
+================================================================================
+
+ENDPOINTS: 12 Total
+
+AUTENTICACIÓN (2):
+  POST /api/auth/register          Register con email/password
+  [...nextauth]                    NextAuth.js handlers (login/logout/callback)
+
+GRUPOS (3):
+  POST /api/groups                 Crear grupo
+  GET /api/groups/info/[code]      Info pública del grupo
+  POST /api/groups/join            Unirse a grupo
+
+JUGADORES (5):
+  GET|POST /api/groups/[id]/players              Listar/Crear
+  GET|DELETE /api/groups/[id]/players/[id]       Ver/Eliminar
+  PUT /api/groups/[id]/players/[id]/edit         Editar
+  POST /api/groups/[id]/players/[id]/rate        Puntuar
+
+INCOMPATIBILIDADES (2):
+  GET|POST /api/groups/[id]/incompatibilities    Listar/Crear
+  DELETE /api/groups/[id]/incompatibilities/[id] Eliminar
+
+EQUIPOS (1) - PRINCIPAL:
+  POST /api/groups/[id]/teams                    Generar equipos (algoritmo)
+
+================================================================================
+5. ALGORITMO DE GENERACIÓN DE EQUIPOS
+================================================================================
+
+OBJETIVO:
+  Crear dos equipos equilibrados respetando incompatibilidades,
+  minimizando diferencia de promedios.
+
+COMPLEJIDAD:
+  ├─ Tiempo: O(100 × n²) donde n = número de jugadores
+  ├─ Espacio: O(n)
+  ├─ Máximo 100 intentos de optimización
+  └─ Criterio parada: diff < 0.1 o timeout
+
+ENTRADA:
+  ├─ Lista de jugadores con puntajes promedio ocultos
+  ├─ Incompatibilidades entre jugadores
+  └─ Mínimo 4 jugadores
+
+SALIDA:
+  ├─ Team A (lista de player IDs)
+  ├─ Team B (lista de player IDs)
+  ├─ averageDiff (diferencia de promedios)
+  └─ Guardado en TeamHistory
+
+PSEUDOCÓDIGO:
+  for attempt = 1 to 100:
+    1. Barajar aleatoriamente jugadores
+    2. Partir en dos mitades (teamA, teamB)
+    3. Validar incompatibilidades
+       - CANNOT_FACE: no pueden enfrentarse
+       - MUST_TOGETHER: deben estar juntos
+    4. Si inválido: continuar
+    5. Calcular diff = |promedio(teamA) - promedio(teamB)|
+    6. Si diff < bestDiff:
+       - Verificar no duplicado en últimos 20
+       - Guardar como mejor solución
+       - Si diff < 0.1: break (suficientemente bueno)
+  Guardar en BD
+  Retornar resultado
+
+EJEMPLO:
+  Entrada: 8 jugadores con puntajes [8.5, 7.2, 9.1, 6.8, 7.9, 8.3, 6.5, 7.6]
+  Salida:  Team A: [9.1, 8.3, 7.6, 6.8] (promedio 8.0)
+           Team B: [8.5, 7.9, 7.2, 6.5] (promedio 7.5)
+           Diff: 0.5 (equilibrado)
+
+================================================================================
+6. SEGURIDAD Y PRIVACIDAD
+================================================================================
+
+AUTENTICACIÓN:
+  ├─ Passwords: Hash bcryptjs (12 rounds) + salt
+  ├─ Sesiones: JWT en cookies HttpOnly, Secure, SameSite
+  ├─ CSRF: NextAuth.js protección automática
+  └─ Rate Limiting: No implementado (recomendado para prod)
+
+VALIDACIÓN:
+  ├─ Input: Zod schema validation en todos los endpoints
+  ├─ SQL Injection: Prisma ORM (queries parametrizadas)
+  ├─ XSS: React escapes HTML por defecto
+  └─ CORS: Same-origin, NextAuth headers
+
+PRIVACIDAD DE PUNTAJES:
+  ├─ Cada usuario ve SOLO su propio puntaje
+  ├─ Promedio NO se muestra en lista de jugadores
+  ├─ Promedio se revela solo en generación de equipos
+  └─ Garantiza imparcialidad (sin prejuicio)
+
+AUTORIZACIÓN:
+  ├─ Sin auth: Home, Login, Register
+  ├─ MEMBER: Dashboard, ver grupos, puntuar, generar
+  ├─ ADMIN: + Editar, eliminar, gestionar incompatibilidades
+  └─ Validación: getServerSession + GroupMember check
+
+================================================================================
+7. RENDIMIENTO Y ESCALABILIDAD
+================================================================================
+
+OPTIMIZACIONES ACTUALES:
+  ├─ SSR: Server Components en Next.js
+  ├─ Code Splitting: Automático por rutas
+  ├─ Caché: React Query con configuración
+  ├─ Índices BD: En groupId, teamHistory
+  ├─ Paginación: Historial = máximo 20 registros
+  └─ Lazy Loading: Pages y componentes
+
+LÍMITES ACTUALES:
+  ├─ Jugadores/grupo: 100+ jugadores (algoritmo O(100×n²))
+  ├─ Grupos/usuario: Ilimitado (pero paginado visualmente)
+  ├─ Historial: 20 últimas generaciones (evita crecimiento)
+  └─ Tiempo gen. equipos: ~5 segundos máximo
+
+PARA PRODUCCIÓN:
+  ├─ Database: PostgreSQL 14+, backups automáticos
+  ├─ Cache: Redis para sesiones y resultados
+  ├─ Rate Limiting: Implementar (

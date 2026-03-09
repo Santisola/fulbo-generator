@@ -1,0 +1,207 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   ANÁLISIS TÉCNICO COMPLETO FINALIZADO                    ║
+║                                                                            ║
+║              FULBO TEAMS GENERATOR - Generador de Equipos 5               ║
+║                                                                            ║
+║                           9 de marzo de 2026                              ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+RESUMEN EJECUTIVO
+═════════════════════════════════════════════════════════════════════════════
+
+PROYECTO:
+  Nombre:         Fulbo Teams Generator
+  Versión:        0.1.0
+  Estado:         MVP en desarrollo
+  Ubicación:      C:\Santi\proyectos\fulbo-generator
+  Tipo:           Aplicación Web Full-Stack
+
+PROPÓSITO:
+  Generar equipos de fútbol 5 equilibrados y justos para partidos amateur
+  usando puntajes ocultos de jugadores para garantizar imparcialidad.
+
+═════════════════════════════════════════════════════════════════════════════
+1. STACK TECNOLÓGICO
+═════════════════════════════════════════════════════════════════════════════
+
+FRONTEND (Cliente):
+  • Next.js 16.1.6 (React Framework con SSR/SSG)
+  • React 19.2.3 (Componentes UI)
+  • TypeScript 5 (Tipado estático)
+  • Tailwind CSS 4 (Estilos utility-first)
+  • React Query 5.90.21 (Data fetching y caché)
+  • Zustand 5.0.11 (Estado global ligero)
+
+BACKEND (Servidor):
+  • Next.js 16.1.6 (API Routes)
+  • Node.js 20+ (Runtime)
+  • Prisma 5.22.0 (ORM type-safe)
+  • PostgreSQL (Base de datos relacional)
+  • NextAuth.js 4.24.13 (Autenticación)
+  • bcryptjs 3.0.3 (Hash de contraseñas)
+  • Zod 4.3.6 (Validación de esquemas)
+
+HERRAMIENTAS:
+  • ESLint 9 (Linting)
+  • TypeScript Compiler (Type checking)
+  • Tailwind CLI (CSS generation)
+  • Prisma CLI (Migraciones, generación)
+
+═════════════════════════════════════════════════════════════════════════════
+2. ESTRUCTURA DEL CÓDIGO
+═════════════════════════════════════════════════════════════════════════════
+
+ARCHIVOS TOTALES: 38 archivos TypeScript/TSX
+LÍNEAS DE CÓDIGO:  ~632 líneas
+
+DISTRIBUCIÓN:
+  • Páginas React:      10 rutas
+  • Componentes:        8 reutilizables
+  • API Endpoints:      12 rutas REST
+  • Librerías Core:     2 módulos (auth, prisma)
+  • Modelos Prisma:     8 entidades
+  • Configuración:      6 archivos
+
+ESTRUCTURA DE DIRECTORIOS:
+  C:\Santi\proyectos\fulbo-generator\
+  ├── prisma/                    # ORM schema (8 entidades)
+  ├── public/                    # Assets estáticos
+  ├── src/
+  │   ├── app/                   # Next.js App Router
+  │   │   ├── api/               # 12 API endpoints
+  │   │   ├── dashboard/         # Panel autenticado (6 rutas)
+  │   │   ├── join/              # Unirse a grupo
+  │   │   ├── login/             # Autenticación
+  │   │   ├── register/          # Registro
+  │   │   └── globals.css        # Estilos globales (Tailwind)
+  │   ├── components/            # 8 componentes React
+  │   ├── lib/                   # 2 librerías (auth, prisma)
+  │   └── types/                 # Tipos TypeScript
+  ├── package.json               # Dependencias
+  ├── tsconfig.json              # Configuración TypeScript
+  ├── next.config.ts             # Configuración Next.js
+  └── tailwind.config.js         # Configuración Tailwind
+
+═════════════════════════════════════════════════════════════════════════════
+3. MODELO DE DATOS (8 ENTIDADES PRISMA)
+═════════════════════════════════════════════════════════════════════════════
+
+User (Usuarios)
+  ├── id (cuid), email (unique), password (hash), name, image
+  ├── Relaciones: createdGroups[], groups[], ratings[]
+  └── Creados en: registro, Google OAuth
+
+Group (Grupos)
+  ├── id (cuid), name, code (unique 6 chars), createdById
+  ├── Relaciones: members[], players[], teamHistory[], incompatibilities[]
+  └── Código único para invitaciones
+
+GroupMember (Membresía)
+  ├── userId, groupId, role (ADMIN|MEMBER), joinedAt
+  ├── Relación unique([userId, groupId])
+  └── Define roles y acceso
+
+Player (Jugadores)
+  ├── id (cuid), name, groupId, averageRating (oculto)
+  ├── Relaciones: ratings[], incompatibilities1[], incompatibilities2[]
+  └── Puntajes agregados pero NO mostrados
+
+Rating (Puntuaciones)
+  ├── id (cuid), playerId, userId, score (1-10), createdAt
+  ├── Relación unique([playerId, userId])
+  └── UN puntaje por usuario-jugador, OCULTO a otros
+
+TeamHistory (Equipos Generados)
+  ├── id (cuid), groupId, teamA (JSON), teamB (JSON)
+  ├── averageDiff (Float), generatedAt
+  └── Últimos 20 almacenados
+
+PlayerIncompatibility (Restricciones)
+  ├── id, groupId, player1Id, player2Id
+  ├── type (CANNOT_FACE_EACH_OTHER | MUST_BE_ON_SAME_TEAM), reason
+  ├── Relación unique([groupId, player1Id, player2Id])
+  └── Respetado por algoritmo
+
+Enums:
+  • Role: ADMIN, MEMBER
+  • CompatibilityType: CANNOT_FACE_EACH_OTHER, MUST_BE_ON_SAME_TEAM
+
+═════════════════════════════════════════════════════════════════════════════
+4. COMPONENTES Y MÓDULOS
+═════════════════════════════════════════════════════════════════════════════
+
+PÁGINAS (10 RUTAS):
+  Públicas (sin auth):
+    ✓ / (Home)                              Landing page del proyecto
+    ✓ /register                             Registro (email/pass/Google)
+    ✓ /login                                Login (credentials/Google)
+    ✓ /join/[code]                          Unirse a grupo por código
+
+  Protegidas (con auth):
+    ✓ /dashboard                            Panel principal
+    ✓ /dashboard/groups/new                 Crear grupo
+    ✓ /dashboard/groups/[id]                Detalle del grupo
+    ✓ /dashboard/groups/[id]/players/new    Agregar jugador
+    ✓ /dashboard/groups/[id]/players/[id]/rate     Puntuar jugador
+    ✓ /dashboard/groups/[id]/generate       Generar equipos
+
+COMPONENTES REACT (8):
+  ✓ ThemeProvider.tsx              Context para tema dark/light
+  ✓ Providers.tsx                  Wrapper principal (SessionProvider, QueryClient)
+  ✓ ThemeToggle.tsx                Botón cambiar tema
+  ✓ CopyButton.tsx                 Copiar código al portapapeles
+  ✓ FloatingGuideButton.tsx        Botón flotante de ayuda
+  ✓ HelpTooltip.tsx                Tooltips informativos
+  ✓ PageLoader.tsx                 Barra de progreso (NPProgress)
+  ✓ AppGuide.tsx                   Guía de uso
+  ✓ DashboardClient.tsx            Dashboard interactivo
+
+API ENDPOINTS (12):
+  Autenticación (2):
+    POST /api/auth/register              Registro con email/password
+    [...nextauth]                        NextAuth.js handlers
+
+  Grupos (3):
+    POST /api/groups                     Crear grupo
+    GET /api/groups/info/[code]          Info pública
+    POST /api/groups/join                Unirse por código
+
+  Jugadores (5):
+    GET|POST /api/groups/[id]/players    Listar/Crear
+    GET|DELETE /api/groups/[id]/players/[id]     Ver/Eliminar
+    PUT /api/groups/[id]/players/[id]/edit       Editar
+    POST /api/groups/[id]/players/[id]/rate      Puntuar
+
+  Incompatibilidades (2):
+    GET|POST /api/groups/[id]/incompatibilities  Listar/Crear
+    DELETE /api/groups/[id]/incompatibilities/[id]  Eliminar
+
+  GENERACIÓN (1) - CORE:
+    POST /api/groups/[id]/teams          Generar equipos (ALGORITMO)
+
+═════════════════════════════════════════════════════════════════════════════
+5. ALGORITMO DE GENERACIÓN DE EQUIPOS (CORE)
+═════════════════════════════════════════════════════════════════════════════
+
+OBJETIVO:
+  Crear dos equipos de fútbol 5 lo más equilibrados posible, respetando
+  incompatibilidades entre jugadores y evitando duplicados.
+
+ENTRADA:
+  • Lista de jugadores con puntajes promedio OCULTOS
+  • Incompatibilidades (tipos: CANNOT_FACE, MUST_TOGETHER)
+  • Mínimo 4 jugadores requeridos
+
+SALIDA:
+  • Team A: Lista de player IDs
+  • Team B: Lista de player IDs
+  • averageDiff: Diferencia de promedios (minimizada)
+  • Guardado automático en TeamHistory
+
+ALGORITMO (Pseudocódigo):
+  for attempt = 1 to 100:
+    1. Barajar aleatoriamente jugadores
+    2. Partir en dos mitades (teamA, teamB)
+    3. Validar incompatibilidades:
+       - CANNOT_FACE: Si player1 en A, player2 NO en B
+       - MUST_TOGETHER: Ambo
