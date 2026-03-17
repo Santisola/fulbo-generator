@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@serwist/next": "^9.5.7",
     "@tanstack/react-query": "^5.90.21",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
