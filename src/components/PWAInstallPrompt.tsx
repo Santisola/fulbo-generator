@@ -111,7 +111,7 @@ export function PWAInstallPrompt() {
       {showFloatingButton && !showBanner && (
         <button
           onClick={handleFloatingClick}
-          className="fixed bottom-4 right-4 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full shadow-lg flex items-center justify-center z-40 transition-all hover:scale-110"
+          className="fixed bottom-20 right-4 sm:bottom-24 sm:right-8 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full shadow-lg flex items-center justify-center z-40 transition-all hover:scale-110"
           aria-label="Instalar app"
         >
           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
