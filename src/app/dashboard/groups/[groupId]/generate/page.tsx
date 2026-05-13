@@ -157,11 +157,6 @@ export default function GenerateTeamsPage({
                     <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
                       <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
                       <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                      {player.averageRating && (
-                        <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                          {player.averageRating.toFixed(1)}
-                        </span>
-                      )}
                     </li>
                   ))}
                 </ul>
@@ -179,11 +174,6 @@ export default function GenerateTeamsPage({
                     <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
                       <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
                       <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                      {player.averageRating && (
-                        <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                          {player.averageRating.toFixed(1)}
-                        </span>
-                      )}
                     </li>
                   ))}
                 </ul>
