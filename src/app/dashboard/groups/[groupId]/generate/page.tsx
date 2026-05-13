@@ -153,19 +153,14 @@ export default function GenerateTeamsPage({
                   Equipo A
                 </h2>
                 <ul className="space-y-2">
-                  {result.teamA.map((player, i) => (
-                    <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
-                      <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
-                      <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                      {player.averageRating && (
-                        <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                          {player.averageRating.toFixed(1)}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                   {result.teamA.map((player, i) => (
+                     <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
+                       <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
+                       <span className="font-medium text-[var(--foreground)]">{player.name}</span>
+                     </li>
+                   ))}
+                 </ul>
+               </div>
 
               <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
                 <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
@@ -175,19 +170,14 @@ export default function GenerateTeamsPage({
                   Equipo B
                 </h2>
                 <ul className="space-y-2">
-                  {result.teamB.map((player, i) => (
-                    <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
-                      <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
-                      <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                      {player.averageRating && (
-                        <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                          {player.averageRating.toFixed(1)}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                   {result.teamB.map((player, i) => (
+                     <li key={player.id} className="flex items-center gap-3 p-3 bg-[var(--secondary)] rounded-lg">
+                       <span className="text-[var(--muted-foreground)] text-sm w-6">{i + 1}</span>
+                       <span className="font-medium text-[var(--foreground)]">{player.name}</span>
+                     </li>
+                   ))}
+                 </ul>
+               </div>
             </div>
 
             <div className="flex gap-4">
