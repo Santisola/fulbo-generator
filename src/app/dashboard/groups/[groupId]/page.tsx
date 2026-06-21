@@ -167,7 +167,12 @@ export default async function GroupDetailPage({
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--secondary)] text-[var(--foreground)] font-semibold rounded-xl hover:opacity-90 transition-all border border-[var(--border)]"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-6a2 2 0 00-2-2H7a2 2 0 00-2 2v6a2 2 0 002 2h3a2 2 0 002-2v-6zm6-4h.01M19 11a2 2 0 11-4 0 2 2 0 014 0zm0 4a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.72 3h16.92a2 2 0 001.72-3L13.71 3.86a2 2 0 00-3.42 0z"
+                    />
                   </svg>
                   Incompatibilidades
                 </Link>

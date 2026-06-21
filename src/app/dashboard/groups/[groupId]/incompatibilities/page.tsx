@@ -24,7 +24,7 @@ interface Incompatibility {
 const TYPE_DESCRIPTIONS = {
   CANNOT_FACE_EACH_OTHER: {
     label: 'Equipos separados',
-    icon: '⚡'
+    icon: '⚠️'
   },
   MUST_BE_ON_SAME_TEAM: {
     label: 'Mismo equipo',
