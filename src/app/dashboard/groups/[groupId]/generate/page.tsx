@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface Player {
   id: string
@@ -21,6 +20,7 @@ export default function GenerateTeamsPage({
   const [players, setPlayers] = useState<Player[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [playersLoading, setPlayersLoading] = useState(true)
   const [error, setError] = useState('')
   const [result, setResult] = useState<{
     teamA: Player[]
@@ -30,14 +30,25 @@ export default function GenerateTeamsPage({
 
   useEffect(() => {
     async function fetchPlayers() {
-      const res = await fetch(`/api/groups/${groupId}/players`)
-      if (res.ok) {
-        const data = await res.json()
-        setPlayers(data)
+      try {
+        const res = await fetch(`/api/groups/${groupId}/players`)
+        if (res.ok) {
+          setPlayers(await res.json())
+        } else {
+          setError('No se pudieron cargar los jugadores')
+        }
+      } catch {
+        setError('Error de conexión al cargar los jugadores')
+      } finally {
+        setPlayersLoading(false)
       }
     }
     fetchPlayers()
   }, [groupId])
+
+  // Sólo se pueden repartir jugadores con puntaje: uno sin puntuar contaría
+  // como 0 y desbalancearía los equipos.
+  const ratedPlayers = players.filter(p => p.averageRating !== null)
 
   const togglePlayer = (id: string) => {
     setSelected(prev =>
@@ -48,10 +59,10 @@ export default function GenerateTeamsPage({
   }
 
   const selectAll = () => {
-    if (selected.length === players.length) {
+    if (selected.length === ratedPlayers.length) {
       setSelected([])
     } else {
-      setSelected(players.map(p => p.id))
+      setSelected(ratedPlayers.map(p => p.id))
     }
   }
 
@@ -108,13 +119,16 @@ export default function GenerateTeamsPage({
     window.open(whatsappUrl, '_blank')
   }
 
-  return (
-    <div className="min-h-screen bg-[var(--background)] p-4 sm:p-6">
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-        <ThemeToggle />
-      </div>
+  // Traduce la diferencia de medias (escala 1-10) a una lectura comprensible.
+  const describeBalance = (diff: number) => {
+    if (diff < 0.3) return { label: 'Equipos muy parejos', emoji: '✅' }
+    if (diff < 0.7) return { label: 'Equipos parejos', emoji: '👍' }
+    if (diff < 1.2) return { label: 'Diferencia moderada', emoji: '⚖️' }
+    return { label: 'Equipos algo desparejos', emoji: '⚠️' }
+  }
 
-      <div className="max-w-4xl mx-auto">
+  return (
+    <div className="max-w-4xl mx-auto">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8 transition-colors"
@@ -131,7 +145,7 @@ export default function GenerateTeamsPage({
         </p>
 
         {error && (
-          <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
@@ -139,9 +153,12 @@ export default function GenerateTeamsPage({
         {result ? (
           <div className="space-y-6">
             <div className="p-4 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-center">
-              <span className="text-[var(--primary)] font-semibold">Diferencia promedio: </span>
-              <strong className="text-[var(--foreground)]">{result.averageDiff.toFixed(2)}</strong>
-              <span className="text-[var(--primary)]"> puntos</span>
+              <p className="text-lg font-semibold text-[var(--foreground)]">
+                {describeBalance(result.averageDiff).emoji} {describeBalance(result.averageDiff).label}
+              </p>
+              <p className="text-sm text-[var(--muted-foreground)] mt-1">
+                Diferencia de media entre equipos: <strong className="text-[var(--foreground)]">{result.averageDiff.toFixed(2)}</strong> puntos
+              </p>
             </div>
 
             <div className="grid gap-3 sm:gap-6 md:grid-cols-2">
@@ -169,7 +186,7 @@ export default function GenerateTeamsPage({
 
               <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
                 <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                  <span className="w-8 h-8 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-sm font-bold">
+                  <span className="w-8 h-8 bg-red-500/20 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center text-sm font-bold">
                     B
                   </span>
                   Equipo B
@@ -214,37 +231,73 @@ export default function GenerateTeamsPage({
               </button>
             </div>
           </div>
+        ) : playersLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <svg className="animate-spin w-8 h-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+        ) : players.length === 0 ? (
+          <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-8 text-center text-[var(--muted-foreground)]">
+            Este grupo todavía no tiene jugadores.
+          </div>
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
               <span className="text-[var(--muted-foreground)]">
-                {selected.length} de {players.length} seleccionados
+                {selected.length} de {ratedPlayers.length} seleccionados
               </span>
-              <button
-                onClick={selectAll}
-                className="text-sm text-[var(--primary)] hover:underline"
-              >
-                {selected.length === players.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-              </button>
+              {ratedPlayers.length > 0 && (
+                <button
+                  onClick={selectAll}
+                  className="text-sm text-[var(--primary)] hover:underline"
+                >
+                  {selected.length === ratedPlayers.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                </button>
+              )}
             </div>
 
             <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)] mb-6">
-              {players.map((player) => (
-                <label
-                  key={player.id}
-                  className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-[var(--secondary)] transition-colors ${selected.includes(player.id) ? 'bg-[var(--primary)]/5' : ''
+              {players.map((player) => {
+                const isRated = player.averageRating !== null
+                return (
+                  <label
+                    key={player.id}
+                    className={`flex items-center gap-4 p-4 transition-colors ${
+                      isRated
+                        ? `cursor-pointer hover:bg-[var(--secondary)] ${selected.includes(player.id) ? 'bg-[var(--primary)]/5' : ''}`
+                        : 'opacity-60 cursor-not-allowed'
                     }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(player.id)}
-                    onChange={() => togglePlayer(player.id)}
-                    className="w-5 h-5 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
-                  />
-                  <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                </label>
-              ))}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(player.id)}
+                      onChange={() => togglePlayer(player.id)}
+                      disabled={!isRated}
+                      className="w-5 h-5 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)] disabled:cursor-not-allowed"
+                    />
+                    <span className="font-medium text-[var(--foreground)]">{player.name}</span>
+                    {isRated ? (
+                      <span className="ml-auto text-sm text-[var(--muted-foreground)]">
+                        {player.averageRating!.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="ml-auto text-xs text-[var(--muted-foreground)] bg-[var(--secondary)] px-2 py-1 rounded-full">
+                        Sin puntaje
+                      </span>
+                    )}
+                  </label>
+                )
+              })}
             </div>
+
+            {ratedPlayers.length < 4 && (
+              <div className="mb-6 p-3 rounded-lg bg-[var(--secondary)] text-[var(--muted-foreground)] text-sm text-center">
+                Necesitás al menos 4 jugadores con puntaje para generar equipos.
+                {players.length > ratedPlayers.length && ' Puntuá a los jugadores marcados como "Sin puntaje".'}
+              </div>
+            )}
 
             <button
               onClick={handleGenerate}
@@ -270,7 +323,6 @@ export default function GenerateTeamsPage({
             </button>
           </>
         )}
-      </div>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 const playerSchema = z.object({
-  name: z.string().min(1).max(100)
+  name: z.string().min(2).max(50)
 })
 
 export async function GET(
@@ -66,8 +66,8 @@ export async function POST(
       }
     })
 
-    if (!membership) {
-      return NextResponse.json({ error: 'No eres miembro del grupo' }, { status: 403 })
+    if (!membership || membership.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Solo los administradores pueden agregar jugadores' }, { status: 403 })
     }
 
     const body = await request.json()

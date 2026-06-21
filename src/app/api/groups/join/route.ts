@@ -2,13 +2,23 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { rateLimit, getClientIp } from '@/lib/rateLimit'
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    // Limita el tanteo de códigos (evita adivinar códigos de grupo por fuerza bruta).
+    const limit = rateLimit(`join:${getClientIp(request)}:${session.user.id}`, 20, 10 * 60 * 1000)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
     }
 
     const body = await request.json()
