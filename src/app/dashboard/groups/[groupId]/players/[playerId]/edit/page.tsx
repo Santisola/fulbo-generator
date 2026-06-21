@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function EditPlayerPage({
   params,
@@ -81,12 +80,7 @@ export default function EditPlayerPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-lg">
+    <div className="w-full max-w-lg mx-auto">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8 transition-colors"
@@ -102,7 +96,7 @@ export default function EditPlayerPage({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -135,13 +129,12 @@ export default function EditPlayerPage({
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="w-full py-3.5 bg-red-500/10 text-red-400 font-semibold rounded-xl hover:bg-red-500/20 transition-all disabled:opacity-50 border border-red-500/20"
+              className="w-full py-3.5 bg-red-500/10 text-red-600 dark:text-red-400 font-semibold rounded-xl hover:bg-red-500/20 transition-all disabled:opacity-50 border border-red-500/20"
             >
               {deleting ? 'Eliminando...' : 'Eliminar Jugador'}
             </button>
           </div>
         </div>
-      </div>
     </div>
   )
 }

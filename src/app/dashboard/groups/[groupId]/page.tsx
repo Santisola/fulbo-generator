@@ -61,6 +61,8 @@ export default async function GroupDetailPage({
     (m) => m.userId === session.user.id && m.role === 'ADMIN'
   )
 
+  const playerNameById = new Map(group.players.map((p) => [p.id, p.name]))
+
   return (
     <div>
       <div className="mb-8">
@@ -204,21 +206,46 @@ export default async function GroupDetailPage({
               <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">Historial</h2>
               <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)]">
                 {group.teamHistory.slice(0, 5).map((history) => {
-                  const teamA = JSON.parse(history.teamA)
-                  const teamB = JSON.parse(history.teamB)
+                  const teamA = (JSON.parse(history.teamA) as string[])
+                    .map((id) => playerNameById.get(id) ?? 'Jugador eliminado')
+                  const teamB = (JSON.parse(history.teamB) as string[])
+                    .map((id) => playerNameById.get(id) ?? 'Jugador eliminado')
                   return (
                     <div key={history.id} className="p-4">
-                      <div className="text-sm text-[var(--muted-foreground)] mb-2">
-                        {new Date(history.generatedAt).toLocaleDateString('es-AR', {
-                          day: 'numeric',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm text-[var(--muted-foreground)]">
+                          {new Date(history.generatedAt).toLocaleDateString('es-AR', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                        <span className="text-xs text-[var(--muted-foreground)]">
+                          Dif. {history.averageDiff.toFixed(2)}
+                        </span>
                       </div>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-[var(--foreground)]">Equipo A: {teamA.length} jugadores</span>
-                        <span className="text-[var(--foreground)]">Equipo B: {teamB.length} jugadores</span>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="w-5 h-5 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center text-xs font-bold">A</span>
+                          </div>
+                          <ul className="space-y-0.5 text-[var(--foreground)]">
+                            {teamA.map((name, i) => (
+                              <li key={i}>{name}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="w-5 h-5 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center text-xs font-bold">B</span>
+                          </div>
+                          <ul className="space-y-0.5 text-[var(--foreground)]">
+                            {teamB.map((name, i) => (
+                              <li key={i}>{name}</li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   )

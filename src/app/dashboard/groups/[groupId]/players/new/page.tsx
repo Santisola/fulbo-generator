@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function NewPlayerPage({
   params,
@@ -44,12 +43,7 @@ export default function NewPlayerPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-lg">
+    <div className="w-full max-w-lg mx-auto">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8 transition-colors"
@@ -65,7 +59,7 @@ export default function NewPlayerPage({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -95,7 +89,6 @@ export default function NewPlayerPage({
             </button>
           </form>
         </div>
-      </div>
     </div>
   )
 }

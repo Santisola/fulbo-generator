@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface PlayerData {
   player: { id: string; name: string }
@@ -71,19 +70,12 @@ export default function RatePlayerPage({
 
   if (!playerData) {
     return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-[var(--muted-foreground)]">Cargando...</div>
-      </div>
+      <div className="text-center py-12 text-[var(--muted-foreground)]">Cargando...</div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-lg">
+    <div className="w-full max-w-lg mx-auto">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8 transition-colors"
@@ -107,7 +99,7 @@ export default function RatePlayerPage({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -130,6 +122,8 @@ export default function RatePlayerPage({
                   max="10"
                   value={score}
                   onChange={(e) => setScore(parseInt(e.target.value))}
+                  aria-label={`Nivel de ${playerData.player.name}`}
+                  aria-valuetext={`${score} de 10`}
                   className="flex-1 h-8 bg-[var(--input)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
                 />
                 <span className="text-2xl font-bold text-[var(--muted-foreground)]">10</span>
@@ -148,7 +142,6 @@ export default function RatePlayerPage({
             </button>
           </form>
         </div>
-      </div>
     </div>
   )
 }

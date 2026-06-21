@@ -68,8 +68,8 @@ export function AppGuide({ isOpen, onClose }: AppGuideProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] w-full max-w-2xl my-auto flex flex-col h-screen sm:h-auto sm:max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] w-full max-w-2xl my-auto flex flex-col h-screen sm:h-auto max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0 sticky top-0 bg-[var(--card)] border-b border-[var(--border)] p-3 sm:p-6 flex justify-between items-center">
           <h2 className="text-lg sm:text-2xl font-bold text-[var(--foreground)]">Guía de la App</h2>
@@ -119,7 +119,7 @@ export function AppGuide({ isOpen, onClose }: AppGuideProps) {
         </div>
 
         {/* Botones de navegación */}
-        <div className="flex-shrink-0 sticky bottom-0 bg-[var(--card)] border-t border-[var(--border)] p-3 sm:p-6 gap-2 sm:gap-3 flex flex-col sm:flex-row justify-between">
+        <div className="flex-shrink-0 sticky bottom-0 bg-[var(--card)] border-t border-[var(--border)] p-3 sm:p-6 gap-2 sm:gap-3 flex flex-row justify-between">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
@@ -128,10 +128,10 @@ export function AppGuide({ isOpen, onClose }: AppGuideProps) {
             ← Anterior
           </button>
 
-          <div className="flex gap-2 flex-col-reverse sm:flex-row w-full sm:w-auto">
+          <div className="flex gap-2 flex-col-reverse sm:flex-row w-auto">
             <button
               onClick={onClose}
-              className="px-3 sm:px-6 py-2.5 sm:py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90 active:scale-95 text-sm sm:text-base font-medium"
+              className="px-3 sm:px-6 py-2.5 sm:py-2 bg-[var(--secondary)] text-[var(--foreground)] rounded-lg hover:opacity-90 active:scale-95 text-sm sm:text-base font-medium hidden sm:inline-block"
             >
               Cerrar
             </button>

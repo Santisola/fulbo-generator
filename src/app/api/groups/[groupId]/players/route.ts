@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 const playerSchema = z.object({
-  name: z.string().min(1).max(100)
+  name: z.string().min(2).max(50)
 })
 
 export async function GET(
@@ -35,10 +35,17 @@ export async function GET(
 
     const players = await prisma.player.findMany({
       where: { groupId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, createdAt: true, averageRating: true }
     })
 
-    return NextResponse.json(players)
+    // No exponemos el promedio al cliente: sólo si el jugador tiene puntaje.
+    const safePlayers = players.map(({ averageRating, ...p }) => ({
+      ...p,
+      rated: averageRating !== null
+    }))
+
+    return NextResponse.json(safePlayers)
   } catch (error) {
     console.error('Error fetching players:', error)
     return NextResponse.json({ error: 'Error al obtener jugadores' }, { status: 500 })
@@ -66,8 +73,8 @@ export async function POST(
       }
     })
 
-    if (!membership) {
-      return NextResponse.json({ error: 'No eres miembro del grupo' }, { status: 403 })
+    if (!membership || membership.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Solo los administradores pueden agregar jugadores' }, { status: 403 })
     }
 
     const body = await request.json()

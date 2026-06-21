@@ -5,13 +5,22 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { FloatingGuideButton } from '@/components/FloatingGuideButton'
+import { Footer } from '@/components/Footer'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full" />
+      </div>
+    )
+  }
 
   if (!session) {
     return null
@@ -50,6 +59,7 @@ export default function DashboardLayout({
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
+      <Footer />
     </div>
   )
 }

@@ -207,7 +207,7 @@ export default function IncompatibilitiesPage({
       </div>
 
       {error && (
-        <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           {error}
         </div>
       )}
@@ -375,7 +375,7 @@ export default function IncompatibilitiesPage({
                               </button>
                               <button
                                 onClick={() => handleDeleteIncompatibility(incompat.id)}
-                                className="text-red-400 hover:text-red-500 text-sm"
+                                className="text-red-600 dark:text-red-400 hover:text-red-500 text-sm"
                               >
                                 Eliminar
                               </button>

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: Request,
@@ -6,11 +7,9 @@ export async function GET(
 ) {
   try {
     const { code } = await params
-    const { PrismaClient } = await import('@prisma/client')
-    const prisma = new PrismaClient()
 
     const group = await prisma.group.findUnique({
-      where: { code: code.toUpperCase() },
+      where: { code: code.toUpperCase().trim() },
       select: { id: true, name: true }
     })
 

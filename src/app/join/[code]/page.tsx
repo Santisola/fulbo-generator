@@ -120,7 +120,7 @@ export default function JoinGroupPage() {
 
       <div className="text-center">
         {error ? (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
             {error}
           </div>
         ) : (

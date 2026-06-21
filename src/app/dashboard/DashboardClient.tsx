@@ -10,7 +10,7 @@ interface Group {
   code: string
   createdAt: Date
   members?: Array<{ id: string; userId: string }>
-  players?: Array<{ id: string; name: string }>
+  players?: Array<{ id: string }>
 }
 
 interface DashboardClientProps {
@@ -22,12 +22,10 @@ export default function DashboardClient({ groups }: DashboardClientProps) {
   const [joinCode, setJoinCode] = useState('')
   const [joinLoading, setJoinLoading] = useState(false)
   const [joinError, setJoinError] = useState('')
-  const [joinSuccess, setJoinSuccess] = useState('')
 
   const handleJoinGroup = async (e: React.FormEvent) => {
     e.preventDefault()
     setJoinError('')
-    setJoinSuccess('')
     setJoinLoading(true)
 
     try {
@@ -41,20 +39,15 @@ export default function DashboardClient({ groups }: DashboardClientProps) {
 
       if (!response.ok) {
         setJoinError(data.error || 'Error al unirse al grupo')
+        setJoinLoading(false)
         return
       }
 
-      setJoinSuccess(`¡Te has unido al grupo exitosamente!`)
-      setJoinCode('')
-      
-      // Recargar después de 1 segundo para ver el nuevo grupo
-      setTimeout(() => {
-        router.refresh()
-      }, 1000)
+      // Ir directo al grupo recién unido.
+      router.push(`/dashboard/groups/${data.groupId}`)
     } catch (error) {
       setJoinError('Error al conectar con el servidor')
       console.error(error)
-    } finally {
       setJoinLoading(false)
     }
   }
@@ -66,7 +59,7 @@ export default function DashboardClient({ groups }: DashboardClientProps) {
         <h1 className="text-4xl font-bold text-[var(--foreground)]">Dashboard</h1>
       </div>
 
-      {/* Botones crear grupo y unirse por código */}
+      {/* Botón crear grupo */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Link
           href="/dashboard/groups/new"
@@ -100,12 +93,6 @@ export default function DashboardClient({ groups }: DashboardClientProps) {
         {joinError && (
           <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
             <p className="text-sm text-red-600 dark:text-red-400">{joinError}</p>
-          </div>
-        )}
-        
-        {joinSuccess && (
-          <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-            <p className="text-sm text-green-600 dark:text-green-400">{joinSuccess}</p>
           </div>
         )}
       </div>
