@@ -265,8 +265,9 @@ export async function POST(
 
     return NextResponse.json({
       id: history.id,
-      teamA: bestTeam.teamA,
-      teamB: bestTeam.teamB,
+      // No exponemos el promedio de cada jugador, sólo id y nombre.
+      teamA: bestTeam.teamA.map(p => ({ id: p.id, name: p.name })),
+      teamB: bestTeam.teamB.map(p => ({ id: p.id, name: p.name })),
       averageDiff: bestDiff,
       generatedAt: history.generatedAt
     })

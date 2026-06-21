@@ -7,7 +7,13 @@ import { use } from 'react'
 interface Player {
   id: string
   name: string
-  averageRating: number | null
+  // Sólo indica si el jugador tiene puntaje; el promedio nunca se expone al cliente.
+  rated: boolean
+}
+
+interface TeamPlayer {
+  id: string
+  name: string
 }
 
 export default function GenerateTeamsPage({
@@ -23,8 +29,8 @@ export default function GenerateTeamsPage({
   const [playersLoading, setPlayersLoading] = useState(true)
   const [error, setError] = useState('')
   const [result, setResult] = useState<{
-    teamA: Player[]
-    teamB: Player[]
+    teamA: TeamPlayer[]
+    teamB: TeamPlayer[]
     averageDiff: number
   } | null>(null)
 
@@ -48,7 +54,7 @@ export default function GenerateTeamsPage({
 
   // Sólo se pueden repartir jugadores con puntaje: uno sin puntuar contaría
   // como 0 y desbalancearía los equipos.
-  const ratedPlayers = players.filter(p => p.averageRating !== null)
+  const ratedPlayers = players.filter(p => p.rated)
 
   const togglePlayer = (id: string) => {
     setSelected(prev =>
@@ -255,7 +261,7 @@ export default function GenerateTeamsPage({
 
             <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)] mb-6">
               {players.map((player) => {
-                const isRated = player.averageRating !== null
+                const isRated = player.rated
                 return (
                   <label
                     key={player.id}
@@ -273,11 +279,7 @@ export default function GenerateTeamsPage({
                       className="w-5 h-5 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)] disabled:cursor-not-allowed"
                     />
                     <span className="font-medium text-[var(--foreground)]">{player.name}</span>
-                    {isRated ? (
-                      <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-                        {player.averageRating!.toFixed(1)}
-                      </span>
-                    ) : (
+                    {!isRated && (
                       <span className="ml-auto text-xs text-[var(--muted-foreground)] bg-[var(--secondary)] px-2 py-1 rounded-full">
                         Sin puntaje
                       </span>

@@ -11,8 +11,9 @@ async function getGroups(userId: string) {
     include: {
       group: {
         include: {
-          members: true,
-          players: true,
+          members: { select: { id: true, userId: true } },
+          // Sólo se usa el conteo; no exponemos datos de jugadores (ni su promedio).
+          players: { select: { id: true } },
         },
       },
     },

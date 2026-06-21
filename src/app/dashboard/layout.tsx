@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { FloatingGuideButton } from '@/components/FloatingGuideButton'
+import { Footer } from '@/components/Footer'
 
 export default function DashboardLayout({
   children,
@@ -58,6 +59,7 @@ export default function DashboardLayout({
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
+      <Footer />
     </div>
   )
 }

@@ -35,10 +35,17 @@ export async function GET(
 
     const players = await prisma.player.findMany({
       where: { groupId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, createdAt: true, averageRating: true }
     })
 
-    return NextResponse.json(players)
+    // No exponemos el promedio al cliente: sólo si el jugador tiene puntaje.
+    const safePlayers = players.map(({ averageRating, ...p }) => ({
+      ...p,
+      rated: averageRating !== null
+    }))
+
+    return NextResponse.json(safePlayers)
   } catch (error) {
     console.error('Error fetching players:', error)
     return NextResponse.json({ error: 'Error al obtener jugadores' }, { status: 500 })

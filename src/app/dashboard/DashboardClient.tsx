@@ -10,7 +10,7 @@ interface Group {
   code: string
   createdAt: Date
   members?: Array<{ id: string; userId: string }>
-  players?: Array<{ id: string; name: string }>
+  players?: Array<{ id: string }>
 }
 
 interface DashboardClientProps {
